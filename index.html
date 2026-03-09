@@ -1590,6 +1590,7 @@ document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
   let startY = 0;
   let currentY = 0;
   let isDragging = false;
+  let startScrollTop = 0;
 
   // Close on backdrop tap
   backdrop.addEventListener('click', function(e) {
@@ -1609,29 +1610,42 @@ document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
     if (e.target === this) e.preventDefault();
   }, { passive: false });
 
-  // Swipe down to dismiss — only from modal-handle or top area
   modal.addEventListener('touchstart', function(e) {
-    // Only begin swipe drag if touching the handle or top 60px of modal
     const touch = e.touches[0];
-    const modalTop = modal.getBoundingClientRect().top;
-    const touchRelative = touch.clientY - modalTop;
-    if (touchRelative < 60) {
-      startY = touch.clientY;
-      isDragging = true;
-      modal.style.transition = 'none';
-    }
+    startY = touch.clientY;
+    startScrollTop = modal.scrollTop;
+    isDragging = false; // will be confirmed in touchmove
+    modal.style.transition = 'none';
   }, { passive: true });
 
   modal.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
     const touch = e.touches[0];
-    currentY = touch.clientY - startY;
-    // Only allow dragging DOWN (positive direction)
-    if (currentY > 0) {
+    const deltaY = touch.clientY - startY;
+
+    // Check if modal is scrolled to the very top
+    const atTop = modal.scrollTop <= 0;
+
+    // Start drag only if: pulling down AND modal is scrolled to top
+    if (!isDragging) {
+      if (deltaY > 6 && atTop) {
+        isDragging = true;
+        currentY = 0;
+      } else {
+        return; // let normal scroll happen
+      }
+    }
+
+    if (isDragging) {
+      currentY = Math.max(0, touch.clientY - startY - (startScrollTop > 0 ? startScrollTop : 0));
       modal.style.transform = `translateY(${currentY}px)`;
-      // Fade backdrop as you drag down
-      const opacity = Math.max(0, 0.7 - (currentY / 300));
+
+      // Live fade blur + dark overlay
+      const progress = Math.min(1, currentY / 280);
+      const opacity = (0.7 * (1 - progress)).toFixed(3);
+      const blur = (4 * (1 - progress)).toFixed(2);
       backdrop.style.background = `rgba(0,0,0,${opacity})`;
+      backdrop.style.backdropFilter = `blur(${blur}px)`;
+      backdrop.style.webkitBackdropFilter = `blur(${blur}px)`;
       e.preventDefault();
     }
   }, { passive: false });
@@ -1640,24 +1654,36 @@ document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
     if (!isDragging) return;
     isDragging = false;
     modal.style.transition = 'transform 0.3s ease';
+    backdrop.style.transition = 'background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease';
 
     if (currentY > 120) {
-      // Dragged far enough — slide down and close
+      // Far enough — dismiss
       modal.style.transform = `translateY(100%)`;
       backdrop.style.background = 'rgba(0,0,0,0)';
+      backdrop.style.backdropFilter = 'blur(0px)';
+      backdrop.style.webkitBackdropFilter = 'blur(0px)';
       setTimeout(() => {
         modal.style.transform = '';
         modal.style.transition = '';
+        backdrop.style.transition = '';
         backdrop.style.background = '';
+        backdrop.style.backdropFilter = '';
+        backdrop.style.webkitBackdropFilter = '';
         closeModal(backdrop.id);
       }, 280);
     } else {
-      // Not far enough — snap back up
+      // Not far enough — snap back
       modal.style.transform = 'translateY(0)';
-      backdrop.style.background = '';
+      backdrop.style.background = 'rgba(0,0,0,0.7)';
+      backdrop.style.backdropFilter = 'blur(4px)';
+      backdrop.style.webkitBackdropFilter = 'blur(4px)';
       setTimeout(() => {
         modal.style.transform = '';
         modal.style.transition = '';
+        backdrop.style.transition = '';
+        backdrop.style.background = '';
+        backdrop.style.backdropFilter = '';
+        backdrop.style.webkitBackdropFilter = '';
       }, 300);
     }
     currentY = 0;
