@@ -1735,10 +1735,10 @@ function renderTxnList() {
 
 function formatDateLabel(ds) {
   const d = new Date(ds + 'T12:00:00');
-  const today = today();
-  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  if (ds === today) return 'Today';
-  if (ds === yesterday) return 'Yesterday';
+  const todayStr = new Date().toISOString().slice(0,10);
+  const yesterdayStr = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if (ds === todayStr) return 'Today';
+  if (ds === yesterdayStr) return 'Yesterday';
   return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 }
 
@@ -1757,7 +1757,7 @@ function openAddTxn() {
   document.getElementById('txn-amount-input').value = '';
   document.getElementById('txn-desc-input').value = '';
   document.getElementById('txn-cat-input').value = 'food';
-  document.getElementById('txn-date-input').value = today();
+  document.getElementById('txn-date-input').value = new Date().toISOString().slice(0,10);
   document.getElementById('txn-note-input').value = '';
   document.getElementById('delete-txn-wrap').innerHTML = '';
   document.getElementById('txn-cat-group').style.display = 'block';
@@ -1814,7 +1814,7 @@ function saveTxn() {
     amount,
     desc,
     cat: txnType==='income' ? 'income' : document.getElementById('txn-cat-input').value,
-    date: document.getElementById('txn-date-input').value || today(),
+    date: document.getElementById('txn-date-input').value || new Date().toISOString().slice(0,10),
     note: document.getElementById('txn-note-input').value.trim(),
   };
 
