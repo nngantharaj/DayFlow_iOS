@@ -109,7 +109,7 @@
   /* ── Modal ── */
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: none; align-items: flex-end; backdrop-filter: blur(4px); touch-action: none; overscroll-behavior: none; }
   .modal-backdrop.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 24px 24px 0 0; width: 100%; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 92dvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; position: relative; }
+  .modal { background: var(--surface); border-radius: 24px 24px 0 0; width: 100%; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 92dvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; position: relative; will-change: transform; }
   .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
   .modal h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; }
   .form-group { margin-bottom: 14px; }
@@ -1582,22 +1582,86 @@ function selectHabitEmoji(el) {
   selectedHabitEmoji = el.textContent;
 }
 
-// Close modal on backdrop click — prevent background movement
-document.querySelectorAll('.modal-backdrop').forEach(b => {
-  b.addEventListener('click', function(e) {
+// ═══════════════════════════════════════════════
+//  SWIPE TO DISMISS MODALS
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  const modal = backdrop.querySelector('.modal');
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+
+  // Close on backdrop tap
+  backdrop.addEventListener('click', function(e) {
     if (e.target === this) closeModal(this.id);
   });
-  // Block ALL touch movement on backdrop — only allow scroll inside .modal
-  b.addEventListener('touchmove', function(e) {
+
+  // Block touchmove on backdrop (not modal) to prevent bg scroll
+  backdrop.addEventListener('touchmove', function(e) {
     if (!e.target.closest('.modal')) {
       e.preventDefault();
       e.stopPropagation();
     }
   }, { passive: false });
+
   // Block touchstart on backdrop itself
-  b.addEventListener('touchstart', function(e) {
+  backdrop.addEventListener('touchstart', function(e) {
     if (e.target === this) e.preventDefault();
   }, { passive: false });
+
+  // Swipe down to dismiss — only from modal-handle or top area
+  modal.addEventListener('touchstart', function(e) {
+    // Only begin swipe drag if touching the handle or top 60px of modal
+    const touch = e.touches[0];
+    const modalTop = modal.getBoundingClientRect().top;
+    const touchRelative = touch.clientY - modalTop;
+    if (touchRelative < 60) {
+      startY = touch.clientY;
+      isDragging = true;
+      modal.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    currentY = touch.clientY - startY;
+    // Only allow dragging DOWN (positive direction)
+    if (currentY > 0) {
+      modal.style.transform = `translateY(${currentY}px)`;
+      // Fade backdrop as you drag down
+      const opacity = Math.max(0, 0.7 - (currentY / 300));
+      backdrop.style.background = `rgba(0,0,0,${opacity})`;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  modal.addEventListener('touchend', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    modal.style.transition = 'transform 0.3s ease';
+
+    if (currentY > 120) {
+      // Dragged far enough — slide down and close
+      modal.style.transform = `translateY(100%)`;
+      backdrop.style.background = 'rgba(0,0,0,0)';
+      setTimeout(() => {
+        modal.style.transform = '';
+        modal.style.transition = '';
+        backdrop.style.background = '';
+        closeModal(backdrop.id);
+      }, 280);
+    } else {
+      // Not far enough — snap back up
+      modal.style.transform = 'translateY(0)';
+      backdrop.style.background = '';
+      setTimeout(() => {
+        modal.style.transform = '';
+        modal.style.transition = '';
+      }, 300);
+    }
+    currentY = 0;
+  });
 });
 
 // ═══════════════════════════════════════════════
