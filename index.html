@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -28,699 +27,568 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow: hidden; }
 
-/* ── Layout ── */
-#app { display: flex; flex-direction: column; height: 100dvh; max-width: 430px; margin: 0 auto; position: relative; }
-#screen { flex: 1; overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-#screen::-webkit-scrollbar { display: none; }
+  /* ── Layout ── */
+  #app { display: flex; flex-direction: column; height: 100dvh; max-width: 430px; margin: 0 auto; position: relative; }
+  #screen { flex: 1; overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+  #screen::-webkit-scrollbar { display: none; }
 
-/* ── Nav ── */
-#nav { display: flex; justify-content: space-around; align-items: center; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); background: var(–surface); border-top: 1px solid var(–border); }
-.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; color: var(–muted); cursor: pointer; padding: 4px 10px; border-radius: 12px; transition: all .2s; }
-.nav-btn.active { color: var(–accent); }
-.nav-btn svg { width: 20px; height: 20px; }
-.nav-btn span { font-size: 9px; font-family: ‘DM Sans’, sans-serif; font-weight: 500; }
+  /* ── Nav ── */
+  #nav { display: flex; justify-content: space-around; align-items: center; padding: 10px 0 max(10px, env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--border); }
+  .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px 16px; border-radius: 12px; transition: all .2s; }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-btn span { font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
 
-/* ── Pages ── */
-.page { display: none; padding: 0 0 20px; }
-.page.active { display: block; }
+  /* ── Pages ── */
+  .page { display: none; padding: 0 0 20px; }
+  .page.active { display: block; }
 
-/* ── Header ── */
-.page-header { padding: 52px 20px 16px; }
-.page-header h1 { font-family: ‘Syne’, sans-serif; font-size: 26px; font-weight: 800; }
-.page-header p { color: var(–muted); font-size: 13px; margin-top: 3px; }
+  /* ── Header ── */
+  .page-header { padding: 52px 20px 16px; }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; }
+  .page-header p { color: var(--muted); font-size: 13px; margin-top: 3px; }
 
-/* ── Today ── */
-.greeting-block { padding: 52px 20px 0; }
-.greeting-block .date-label { font-size: 12px; color: var(–muted); text-transform: uppercase; letter-spacing: 1px; }
-.greeting-block h1 { font-family: ‘Syne’, sans-serif; font-size: 28px; font-weight: 800; margin-top: 2px; }
-.greeting-block .quote { font-size: 13px; color: var(–muted); margin-top: 6px; font-style: italic; line-height: 1.5; border-left: 3px solid var(–accent); padding-left: 10px; }
+  /* ── Today ── */
+  .greeting-block { padding: 52px 20px 0; }
+  .greeting-block .date-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .greeting-block h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-top: 2px; }
+  .greeting-block .quote { font-size: 13px; color: var(--muted); margin-top: 6px; font-style: italic; line-height: 1.5; border-left: 3px solid var(--accent); padding-left: 10px; }
 
-/* Progress ring */
-.progress-card { margin: 16px 20px 0; background: linear-gradient(135deg, #1a1b2e 0%, #1e1b2e 100%); border: 1px solid var(–border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 20px; }
-.ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
-.ring-wrap svg { transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: var(–border); stroke-width: 8; }
-.ring-fill { fill: none; stroke: var(–accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
-.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring-pct { font-family: ‘Syne’, sans-serif; font-size: 18px; font-weight: 800; }
-.ring-label { font-size: 9px; color: var(–muted); text-transform: uppercase; }
-.progress-info h2 { font-family: ‘Syne’, sans-serif; font-size: 16px; font-weight: 700; }
-.progress-info p { font-size: 13px; color: var(–muted); margin-top: 4px; }
-.mini-stats { display: flex; gap: 12px; margin-top: 10px; }
-.mini-stat { background: var(–surface2); border-radius: 10px; padding: 6px 10px; font-size: 11px; color: var(–muted); }
-.mini-stat b { color: var(–text); font-weight: 600; display: block; font-size: 14px; }
+  /* Progress ring */
+  .progress-card { margin: 16px 20px 0; background: linear-gradient(135deg, #1a1b2e 0%, #1e1b2e 100%); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 20px; }
+  .ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+  .ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+  .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-pct { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .ring-label { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+  .progress-info h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .progress-info p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .mini-stats { display: flex; gap: 12px; margin-top: 10px; }
+  .mini-stat { background: var(--surface2); border-radius: 10px; padding: 6px 10px; font-size: 11px; color: var(--muted); }
+  .mini-stat b { color: var(--text); font-weight: 600; display: block; font-size: 14px; }
 
-/* Section labels */
-.section-label { display: flex; align-items: center; gap: 8px; padding: 20px 20px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(–muted); font-weight: 600; }
-.section-label .dot { width: 8px; height: 8px; border-radius: 50%; }
+  /* Section labels */
+  .section-label { display: flex; align-items: center; gap: 8px; padding: 20px 20px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  .section-label .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* Task cards */
-.task-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
-.task-card { display: flex; align-items: center; gap: 12px; background: var(–surface); border: 1px solid var(–border); border-radius: 16px; padding: 14px 16px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
-.task-card::before { content: ‘’; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
-.task-card.morning::before { background: var(–morning); }
-.task-card.afternoon::before { background: var(–afternoon); }
-.task-card.evening::before { background: var(–evening); }
-.task-card.night::before { background: var(–night); }
-.task-card.done { opacity: .55; }
-.task-card.done .task-name { text-decoration: line-through; }
-.task-card:active { transform: scale(.98); }
+  /* Task cards */
+  .task-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+  .task-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
+  .task-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+  .task-card.morning::before { background: var(--morning); }
+  .task-card.afternoon::before { background: var(--afternoon); }
+  .task-card.evening::before { background: var(--evening); }
+  .task-card.night::before { background: var(--night); }
+  .task-card.done { opacity: .55; }
+  .task-card.done .task-name { text-decoration: line-through; }
+  .task-card:active { transform: scale(.98); }
 
-.check-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(–border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .25s; }
-.task-card.done .check-circle { background: var(–accent); border-color: var(–accent); }
-.check-circle svg { width: 14px; height: 14px; stroke: white; stroke-width: 2.5; display: none; }
-.task-card.done .check-circle svg { display: block; }
+  .check-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .25s; }
+  .task-card.done .check-circle { background: var(--accent); border-color: var(--accent); }
+  .check-circle svg { width: 14px; height: 14px; stroke: white; stroke-width: 2.5; display: none; }
+  .task-card.done .check-circle svg { display: block; }
 
-.task-info { flex: 1; min-width: 0; }
-.task-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.task-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-.task-time { font-size: 11px; color: var(–muted); }
-.task-tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
-.task-duration { font-size: 11px; color: var(–muted); }
+  .task-info { flex: 1; min-width: 0; }
+  .task-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .task-time { font-size: 11px; color: var(--muted); }
+  .task-tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+  .task-duration { font-size: 11px; color: var(--muted); }
 
-.task-emoji { font-size: 20px; width: 32px; text-align: center; flex-shrink: 0; }
+  .task-emoji { font-size: 20px; width: 32px; text-align: center; flex-shrink: 0; }
 
-/* Timer badge */
-.timer-badge { background: var(–surface2); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-family: ‘Syne’, sans-serif; font-weight: 700; color: var(–accent); white-space: nowrap; }
+  /* Timer badge */
+  .timer-badge { background: var(--surface2); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); white-space: nowrap; }
 
-/* Quick Add */
-.fab { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(–accent); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(124,106,247,.5); transition: transform .2s; z-index: 50; }
-.fab:active { transform: scale(.9); }
+  /* Quick Add */
+  .fab { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(124,106,247,.5); transition: transform .2s; z-index: 50; }
+  .fab:active { transform: scale(.9); }
 
-/* ── Modal ── */
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: none; align-items: flex-end; backdrop-filter: blur(4px); touch-action: none; overscroll-behavior: none; }
-.modal-backdrop.open { display: flex; }
-.modal { background: var(–surface); border-radius: 24px 24px 0 0; width: 100%; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 92dvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; position: relative; will-change: transform; }
-.modal-handle { width: 36px; height: 4px; background: var(–border); border-radius: 2px; margin: 0 auto 16px; }
-.modal h2 { font-family: ‘Syne’, sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; }
-.form-group { margin-bottom: 14px; }
-.form-group label { display: block; font-size: 12px; color: var(–muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 12px 14px; color: var(–text); font-family: ‘DM Sans’, sans-serif; font-size: 16px; outline: none; transition: border-color .2s; -webkit-appearance: none; appearance: none; box-sizing: border-box; }
-.form-group input:focus, .form-group select:focus { border-color: var(–accent); }
-.form-group select option { background: var(–surface); }
-.form-group textarea { resize: none; height: 70px; font-size: 16px; }
+  /* ── Modal ── */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: none; align-items: flex-end; backdrop-filter: blur(4px); touch-action: none; overscroll-behavior: none; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 24px 24px 0 0; width: 100%; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 92dvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; position: relative; will-change: transform; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none; transition: border-color .2s; -webkit-appearance: none; appearance: none; box-sizing: border-box; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group select option { background: var(--surface); }
+  .form-group textarea { resize: none; height: 70px; font-size: 16px; }
 
-.emoji-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.emoji-opt { background: var(–surface2); border: 2px solid transparent; border-radius: 10px; padding: 6px 10px; font-size: 20px; cursor: pointer; transition: all .15s; }
-.emoji-opt.selected { border-color: var(–accent); background: rgba(124,106,247,.15); }
+  .emoji-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .emoji-opt { background: var(--surface2); border: 2px solid transparent; border-radius: 10px; padding: 6px 10px; font-size: 20px; cursor: pointer; transition: all .15s; }
+  .emoji-opt.selected { border-color: var(--accent); background: rgba(124,106,247,.15); }
 
-.btn-row { display: flex; gap: 10px; margin-top: 16px; }
-.btn-primary { flex: 1; background: var(–accent); color: white; border: none; border-radius: 14px; padding: 14px; font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
-.btn-primary:active { opacity: .8; }
-.btn-ghost { background: var(–surface2); color: var(–text); border: none; border-radius: 14px; padding: 14px 18px; font-size: 15px; cursor: pointer; }
-.btn-danger { background: rgba(247,106,106,.15); color: var(–danger); border: 1px solid rgba(247,106,106,.3); border-radius: 14px; padding: 14px 18px; font-size: 14px; cursor: pointer; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-primary { flex: 1; background: var(--accent); color: white; border: none; border-radius: 14px; padding: 14px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+  .btn-primary:active { opacity: .8; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: none; border-radius: 14px; padding: 14px 18px; font-size: 15px; cursor: pointer; }
+  .btn-danger { background: rgba(247,106,106,.15); color: var(--danger); border: 1px solid rgba(247,106,106,.3); border-radius: 14px; padding: 14px 18px; font-size: 14px; cursor: pointer; }
 
-/* ── Habits Page ── */
-.habit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
-.habit-card { background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; cursor: pointer; transition: all .2s; }
-.habit-card:active { transform: scale(.97); }
-.habit-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.habit-emoji { font-size: 26px; }
-.habit-streak { display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(–accent2); }
-.habit-name { font-size: 14px; font-weight: 600; margin-top: 10px; }
-.habit-freq { font-size: 11px; color: var(–muted); margin-top: 2px; }
-.habit-bar-wrap { margin-top: 10px; height: 5px; background: var(–border); border-radius: 3px; overflow: hidden; }
-.habit-bar { height: 100%; border-radius: 3px; transition: width .4s ease; }
-.habit-week { display: flex; gap: 4px; margin-top: 8px; }
-.habit-dot { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(–border); }
-.habit-dot.done { border-color: transparent; }
+  /* ── Habits Page ── */
+  .habit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
+  .habit-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; cursor: pointer; transition: all .2s; }
+  .habit-card:active { transform: scale(.97); }
+  .habit-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .habit-emoji { font-size: 26px; }
+  .habit-streak { display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--accent2); }
+  .habit-name { font-size: 14px; font-weight: 600; margin-top: 10px; }
+  .habit-freq { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .habit-bar-wrap { margin-top: 10px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .habit-bar { height: 100%; border-radius: 3px; transition: width .4s ease; }
+  .habit-week { display: flex; gap: 4px; margin-top: 8px; }
+  .habit-dot { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); }
+  .habit-dot.done { border-color: transparent; }
 
-/* ── Stats Page ── */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
-.stat-card { background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; }
-.stat-card.wide { grid-column: span 2; }
-.stat-card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(–muted); margin-bottom: 8px; }
-.stat-val { font-family: ‘Syne’, sans-serif; font-size: 32px; font-weight: 800; }
-.stat-sub { font-size: 12px; color: var(–muted); margin-top: 2px; }
-.heatmap { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; margin-top: 6px; }
-.heatmap-cell { aspect-ratio: 1; border-radius: 3px; }
-.chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 80px; margin-top: 6px; }
-.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s; }
-.chart-day { font-size: 9px; color: var(–muted); }
+  /* ── Stats Page ── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .stat-card.wide { grid-column: span 2; }
+  .stat-card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .heatmap { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; margin-top: 6px; }
+  .heatmap-cell { aspect-ratio: 1; border-radius: 3px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 80px; margin-top: 6px; }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s; }
+  .chart-day { font-size: 9px; color: var(--muted); }
 
-/* ── Settings ── */
-.settings-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
-.settings-item { background: var(–surface); border: 1px solid var(–border); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.settings-item-left { display: flex; align-items: center; gap: 12px; }
-.settings-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.settings-label { font-size: 14px; font-weight: 500; }
-.settings-sub { font-size: 11px; color: var(–muted); }
-.toggle { width: 44px; height: 26px; border-radius: 13px; background: var(–border); position: relative; cursor: pointer; transition: background .25s; border: none; flex-shrink: 0; }
-.toggle.on { background: var(–accent); }
-.toggle::after { content: ‘’; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform .25s; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
-.toggle.on::after { transform: translateX(18px); }
+  /* ── Settings ── */
+  .settings-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+  .settings-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .settings-item-left { display: flex; align-items: center; gap: 12px; }
+  .settings-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .settings-label { font-size: 14px; font-weight: 500; }
+  .settings-sub { font-size: 11px; color: var(--muted); }
+  .toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--border); position: relative; cursor: pointer; transition: background .25s; border: none; flex-shrink: 0; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform .25s; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+  .toggle.on::after { transform: translateX(18px); }
 
-/* Streak fire */
-.streak-fire { font-size: 20px; }
+  /* Streak fire */
+  .streak-fire { font-size: 20px; }
 
-/* Toast */
-#toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(–surface); border: 1px solid var(–border); border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; opacity: 0; transition: all .3s; z-index: 200; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.4); pointer-events: none; }
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* Toast */
+  #toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; opacity: 0; transition: all .3s; z-index: 200; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.4); pointer-events: none; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Color tags */
-.tag-work { background: rgba(124,106,247,.2); color: #a89bf9; }
-.tag-health { background: rgba(106,247,200,.2); color: #6af7c8; }
-.tag-personal { background: rgba(247,145,106,.2); color: #f7b96a; }
-.tag-mindset { background: rgba(247,212,106,.2); color: #f7d46a; }
+  /* Color tags */
+  .tag-work { background: rgba(124,106,247,.2); color: #a89bf9; }
+  .tag-health { background: rgba(106,247,200,.2); color: #6af7c8; }
+  .tag-personal { background: rgba(247,145,106,.2); color: #f7b96a; }
+  .tag-mindset { background: rgba(247,212,106,.2); color: #f7d46a; }
 
-/* Swipe hint */
-.swipe-hint { text-align: center; font-size: 11px; color: var(–muted); padding: 8px; }
+  /* Swipe hint */
+  .swipe-hint { text-align: center; font-size: 11px; color: var(--muted); padding: 8px; }
 
-/* Timer active */
-.timer-active-bar { margin: 10px 20px 0; background: linear-gradient(135deg, rgba(124,106,247,.15), rgba(106,247,200,.1)); border: 1px solid rgba(124,106,247,.3); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
-.timer-active-bar.hidden { display: none; }
-.timer-label { font-size: 12px; color: var(–muted); }
-.timer-count { font-family: ‘Syne’, sans-serif; font-size: 20px; font-weight: 800; color: var(–accent); }
-.timer-stop { background: rgba(247,106,106,.15); color: var(–danger); border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+  /* Timer active */
+  .timer-active-bar { margin: 10px 20px 0; background: linear-gradient(135deg, rgba(124,106,247,.15), rgba(106,247,200,.1)); border: 1px solid rgba(124,106,247,.3); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .timer-active-bar.hidden { display: none; }
+  .timer-label { font-size: 12px; color: var(--muted); }
+  .timer-count { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); }
+  .timer-stop { background: rgba(247,106,106,.15); color: var(--danger); border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
 
-/* Medals */
-.medals-row { display: flex; gap: 8px; padding: 0 20px; flex-wrap: wrap; }
-.medal { background: var(–surface); border: 1px solid var(–border); border-radius: 12px; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
-.medal.earned { border-color: var(–accent4); background: rgba(247,212,106,.08); }
-.medal-icon { font-size: 18px; }
+  /* Medals */
+  .medals-row { display: flex; gap: 8px; padding: 0 20px; flex-wrap: wrap; }
+  .medal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .medal.earned { border-color: var(--accent4); background: rgba(247,212,106,.08); }
+  .medal-icon { font-size: 18px; }
 
-/* Empty state */
-.empty-state { text-align: center; padding: 40px 20px; color: var(–muted); }
-.empty-state .big-emoji { font-size: 48px; margin-bottom: 12px; }
-.empty-state p { font-size: 14px; line-height: 1.6; }
+  /* Empty state */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .big-emoji { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
 
-/* Mood row */
-.mood-row { display: flex; gap: 8px; padding: 0 20px; margin-top: 4px; }
-.mood-btn { flex: 1; background: var(–surface); border: 2px solid var(–border); border-radius: 14px; padding: 10px 4px; text-align: center; cursor: pointer; font-size: 22px; transition: all .2s; }
-.mood-btn.selected { border-color: var(–accent); background: rgba(124,106,247,.12); }
-.mood-btn span { display: block; font-size: 9px; color: var(–muted); margin-top: 2px; }
+  /* Mood row */
+  .mood-row { display: flex; gap: 8px; padding: 0 20px; margin-top: 4px; }
+  .mood-btn { flex: 1; background: var(--surface); border: 2px solid var(--border); border-radius: 14px; padding: 10px 4px; text-align: center; cursor: pointer; font-size: 22px; transition: all .2s; }
+  .mood-btn.selected { border-color: var(--accent); background: rgba(124,106,247,.12); }
+  .mood-btn span { display: block; font-size: 9px; color: var(--muted); margin-top: 2px; }
 
-/* Checklist */
-.sub-tasks { padding: 4px 0 0 50px; display: flex; flex-direction: column; gap: 5px; }
-.sub-task { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(–muted); }
-.sub-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(–border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-.sub-check.done { background: var(–accent3); border-color: var(–accent3); }
+  /* Checklist */
+  .sub-tasks { padding: 4px 0 0 50px; display: flex; flex-direction: column; gap: 5px; }
+  .sub-task { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .sub-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .sub-check.done { background: var(--accent3); border-color: var(--accent3); }
 
-/* Note */
-.note-card { margin: 8px 20px 0; background: var(–surface); border: 1px solid var(–border); border-radius: 14px; padding: 14px 16px; }
-.note-card textarea { width: 100%; background: none; border: none; color: var(–text); font-family: ‘DM Sans’, sans-serif; font-size: 13px; outline: none; resize: none; line-height: 1.6; }
+  /* Note */
+  .note-card { margin: 8px 20px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+  .note-card textarea { width: 100%; background: none; border: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; line-height: 1.6; }
 
-/* Quote cycling */
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-.quote-anim { animation: fadeIn .4s ease; }
+  /* Quote cycling */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .quote-anim { animation: fadeIn .4s ease; }
 
-/* Animations */
-@keyframes popIn { 0% { transform: scale(.8); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
-.pop { animation: popIn .3s ease forwards; }
+  /* Animations */
+  @keyframes popIn { 0% { transform: scale(.8); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+  .pop { animation: popIn .3s ease forwards; }
 
-@keyframes confetti { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(180deg); } }
+  @keyframes confetti { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(180deg); } }
 
-/* Scroll areas */
-#screen { padding-bottom: 10px; }
+  /* Scroll areas */
+  #screen { padding-bottom: 10px; }
 
-/* ══════════════════════════════
-EXPENSE TRACKER STYLES
-══════════════════════════════ */
+  /* ══════════════════════════════
+     EXPENSE TRACKER STYLES
+  ══════════════════════════════ */
 
-/* Balance hero card */
-.balance-hero { margin: 52px 20px 0; background: linear-gradient(135deg, #1a1040 0%, #1e1530 50%, #1a1040 100%); border: 1px solid rgba(124,106,247,.3); border-radius: 24px; padding: 24px 20px 20px; position: relative; overflow: hidden; }
-.balance-hero::before { content: ‘’; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(124,106,247,.25) 0%, transparent 70%); border-radius: 50%; }
-.balance-hero::after { content: ‘’; position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: radial-gradient(circle, rgba(106,247,200,.15) 0%, transparent 70%); border-radius: 50%; }
-.balance-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(–muted); }
-.balance-amount { font-family: ‘Syne’, sans-serif; font-size: 38px; font-weight: 800; margin: 4px 0; }
-.balance-amount .currency { font-size: 20px; color: var(–muted); margin-right: 2px; }
-.balance-row { display: flex; gap: 12px; margin-top: 16px; }
-.balance-pill { flex: 1; background: rgba(255,255,255,.06); border-radius: 14px; padding: 10px 12px; }
-.balance-pill-label { font-size: 10px; color: var(–muted); text-transform: uppercase; letter-spacing: 1px; }
-.balance-pill-val { font-family: ‘Syne’, sans-serif; font-size: 16px; font-weight: 700; margin-top: 2px; }
-.balance-pill-val.income { color: var(–accent3); }
-.balance-pill-val.expense { color: var(–danger); }
+  /* Balance hero card */
+  .balance-hero { margin: 52px 20px 0; background: linear-gradient(135deg, #1a1040 0%, #1e1530 50%, #1a1040 100%); border: 1px solid rgba(124,106,247,.3); border-radius: 24px; padding: 24px 20px 20px; position: relative; overflow: hidden; }
+  .balance-hero::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(124,106,247,.25) 0%, transparent 70%); border-radius: 50%; }
+  .balance-hero::after { content: ''; position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: radial-gradient(circle, rgba(106,247,200,.15) 0%, transparent 70%); border-radius: 50%; }
+  .balance-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .balance-amount { font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 800; margin: 4px 0; }
+  .balance-amount .currency { font-size: 20px; color: var(--muted); margin-right: 2px; }
+  .balance-row { display: flex; gap: 12px; margin-top: 16px; }
+  .balance-pill { flex: 1; background: rgba(255,255,255,.06); border-radius: 14px; padding: 10px 12px; }
+  .balance-pill-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .balance-pill-val { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .balance-pill-val.income { color: var(--accent3); }
+  .balance-pill-val.expense { color: var(--danger); }
 
-/* Budget bar */
-.budget-bar-card { margin: 12px 20px 0; background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; }
-.budget-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.budget-bar-title { font-size: 13px; font-weight: 600; }
-.budget-bar-pct { font-family: ‘Syne’, sans-serif; font-size: 13px; font-weight: 700; }
-.budget-track { height: 8px; background: var(–border); border-radius: 4px; overflow: hidden; }
-.budget-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
-.budget-sub { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(–muted); }
+  /* Budget bar */
+  .budget-bar-card { margin: 12px 20px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .budget-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .budget-bar-title { font-size: 13px; font-weight: 600; }
+  .budget-bar-pct { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .budget-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .budget-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+  .budget-sub { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); }
 
-/* Donut chart */
-.donut-card { margin: 12px 20px 0; background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; }
-.donut-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(–muted); margin-bottom: 14px; }
-.donut-wrap { display: flex; align-items: center; gap: 20px; }
-.donut-svg-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
-.donut-svg-wrap svg { transform: rotate(-90deg); }
-.donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.donut-center-val { font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 800; }
-.donut-center-label { font-size: 9px; color: var(–muted); }
-.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 7px; }
-.donut-legend-item { display: flex; align-items: center; gap: 8px; }
-.donut-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-.donut-legend-name { font-size: 12px; flex: 1; }
-.donut-legend-pct { font-size: 11px; color: var(–muted); font-weight: 600; }
+  /* Donut chart */
+  .donut-card { margin: 12px 20px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .donut-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 14px; }
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-svg-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+  .donut-svg-wrap svg { transform: rotate(-90deg); }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .donut-center-val { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; }
+  .donut-center-label { font-size: 9px; color: var(--muted); }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .donut-legend-item { display: flex; align-items: center; gap: 8px; }
+  .donut-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .donut-legend-name { font-size: 12px; flex: 1; }
+  .donut-legend-pct { font-size: 11px; color: var(--muted); font-weight: 600; }
 
-/* Transaction list */
-.txn-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
-.txn-card { display: flex; align-items: center; gap: 12px; background: var(–surface); border: 1px solid var(–border); border-radius: 16px; padding: 13px 15px; cursor: pointer; transition: all .2s; }
-.txn-card:active { transform: scale(.98); }
-.txn-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-.txn-info { flex: 1; min-width: 0; }
-.txn-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.txn-meta { font-size: 11px; color: var(–muted); margin-top: 2px; display: flex; gap: 6px; }
-.txn-amount { font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.txn-amount.neg { color: var(–danger); }
-.txn-amount.pos { color: var(–accent3); }
+  /* Transaction list */
+  .txn-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+  .txn-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 13px 15px; cursor: pointer; transition: all .2s; }
+  .txn-card:active { transform: scale(.98); }
+  .txn-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .txn-info { flex: 1; min-width: 0; }
+  .txn-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .txn-meta { font-size: 11px; color: var(--muted); margin-top: 2px; display: flex; gap: 6px; }
+  .txn-amount { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .txn-amount.neg { color: var(--danger); }
+  .txn-amount.pos { color: var(--accent3); }
 
-/* Category filter pills */
-.filter-scroll { display: flex; gap: 8px; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
-.filter-scroll::-webkit-scrollbar { display: none; }
-.filter-pill { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 6px 14px; font-size: 12px; white-space: nowrap; cursor: pointer; transition: all .2s; flex-shrink: 0; }
-.filter-pill.active { background: var(–accent); border-color: var(–accent); color: white; }
+  /* Category filter pills */
+  .filter-scroll { display: flex; gap: 8px; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .filter-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; white-space: nowrap; cursor: pointer; transition: all .2s; flex-shrink: 0; }
+  .filter-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-/* Mini bar chart for spending trend */
-.trend-card { margin: 12px 20px 0; background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; }
-.trend-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(–muted); margin-bottom: 12px; }
-.trend-bars { display: flex; align-items: flex-end; gap: 6px; height: 60px; }
-.trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.trend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height .4s ease; }
-.trend-day { font-size: 9px; color: var(–muted); }
+  /* Mini bar chart for spending trend */
+  .trend-card { margin: 12px 20px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .trend-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; }
+  .trend-bars { display: flex; align-items: flex-end; gap: 6px; height: 60px; }
+  .trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .trend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height .4s ease; }
+  .trend-day { font-size: 9px; color: var(--muted); }
 
-/* Add expense modal extras */
-.type-toggle { display: flex; background: var(–surface2); border-radius: 12px; padding: 3px; margin-bottom: 14px; }
-.type-btn { flex: 1; padding: 8px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; border: none; background: none; color: var(–muted); }
-.type-btn.active-expense { background: var(–danger); color: white; }
-.type-btn.active-income { background: var(–accent3); color: #0e0f14; }
+  /* Add expense modal extras */
+  .type-toggle { display: flex; background: var(--surface2); border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+  .type-btn { flex: 1; padding: 8px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; border: none; background: none; color: var(--muted); }
+  .type-btn.active-expense { background: var(--danger); color: white; }
+  .type-btn.active-income { background: var(--accent3); color: #0e0f14; }
 
-/* Savings goal card */
-.savings-card { margin: 12px 20px 0; background: linear-gradient(135deg, rgba(106,247,200,.1), rgba(124,106,247,.1)); border: 1px solid rgba(106,247,200,.2); border-radius: 18px; padding: 16px; }
-.savings-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(–accent3); margin-bottom: 10px; }
-.savings-goal-item { margin-bottom: 10px; }
-.savings-goal-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
-.savings-goal-name { font-size: 13px; font-weight: 500; }
-.savings-goal-val { font-size: 12px; color: var(–muted); }
-.savings-bar-wrap { height: 6px; background: var(–border); border-radius: 3px; overflow: hidden; }
-.savings-bar { height: 100%; border-radius: 3px; background: var(–accent3); transition: width .5s ease; }
+  /* Savings goal card */
+  .savings-card { margin: 12px 20px 0; background: linear-gradient(135deg, rgba(106,247,200,.1), rgba(124,106,247,.1)); border: 1px solid rgba(106,247,200,.2); border-radius: 18px; padding: 16px; }
+  .savings-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent3); margin-bottom: 10px; }
+  .savings-goal-item { margin-bottom: 10px; }
+  .savings-goal-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .savings-goal-name { font-size: 13px; font-weight: 500; }
+  .savings-goal-val { font-size: 12px; color: var(--muted); }
+  .savings-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .savings-bar { height: 100%; border-radius: 3px; background: var(--accent3); transition: width .5s ease; }
 
-/* Month selector */
-.month-selector { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin-bottom: 4px; }
-.month-label { font-family: ‘Syne’, sans-serif; font-size: 16px; font-weight: 700; }
-.month-nav { background: var(–surface); border: 1px solid var(–border); color: var(–text); border-radius: 10px; padding: 5px 12px; font-size: 16px; cursor: pointer; }
+  /* Month selector */
+  .month-selector { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin-bottom: 4px; }
+  .month-label { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .month-nav { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 5px 12px; font-size: 16px; cursor: pointer; }
 
-/* “In my pocket” feature */
-.pocket-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(106,247,200,.12); border: 1px solid rgba(106,247,200,.25); border-radius: 20px; padding: 5px 12px; margin-top: 8px; }
-.pocket-chip span { font-size: 12px; color: var(–accent3); font-weight: 600; }
-/* ══════════════════════════════
-CALENDAR PAGE STYLES
-══════════════════════════════ */
-.cal-header { padding: 52px 20px 10px; display: flex; align-items: center; justify-content: space-between; }
-.cal-header h1 { font-family: ‘Syne’, sans-serif; font-size: 24px; font-weight: 800; }
-.cal-nav-row { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 12px; }
-.cal-month-label { font-family: ‘Syne’, sans-serif; font-size: 17px; font-weight: 700; }
-.cal-nav-btn { background: var(–surface); border: 1px solid var(–border); color: var(–text); border-radius: 10px; padding: 5px 14px; font-size: 16px; cursor: pointer; }
-.cal-grid-wrap { padding: 0 16px; }
-.cal-day-labels { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
-.cal-day-label { text-align: center; font-size: 10px; color: var(–muted); text-transform: uppercase; letter-spacing: .5px; padding: 4px 0; }
-.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-.cal-cell { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: all .15s; }
-.cal-cell:active { transform: scale(.92); }
-.cal-cell .cal-num { font-size: 13px; font-weight: 600; line-height: 1; }
-.cal-cell .cal-dot-row { display: flex; gap: 2px; margin-top: 3px; }
-.cal-cell .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
-.cal-cell.empty { opacity: 0; pointer-events: none; }
-.cal-cell.other-month .cal-num { color: var(–muted); opacity: .4; }
-.cal-cell.today-cell { background: var(–accent); }
-.cal-cell.today-cell .cal-num { color: white; }
-.cal-cell.full-day { background: rgba(106,247,200,.15); border: 1px solid rgba(106,247,200,.3); }
-.cal-cell.full-day .cal-num { color: var(–accent3); }
-.cal-cell.partial-day { background: rgba(124,106,247,.1); border: 1px solid rgba(124,106,247,.2); }
-.cal-cell.has-expense .cal-dot { background: var(–accent2); }
-.cal-cell.selected-day { outline: 2px solid var(–accent4); outline-offset: 1px; }
-
-/* Day detail card */
-.cal-detail { margin: 12px 16px 0; background: var(–surface); border: 1px solid var(–border); border-radius: 18px; padding: 16px; min-height: 80px; }
-.cal-detail h3 { font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; }
-.cal-detail-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(–border); }
-.cal-detail-row:last-child { border-bottom: none; }
-.cal-detail-emoji { font-size: 16px; width: 24px; text-align: center; }
-.cal-detail-name { font-size: 13px; flex: 1; }
-.cal-detail-check { font-size: 14px; }
-
-/* Cal legend */
-.cal-legend { display: flex; gap: 12px; padding: 10px 16px 0; flex-wrap: wrap; }
-.cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(–muted); }
-.cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
-
-/* ══════════════════════════════
-NOTIFICATION STYLES
-══════════════════════════════ */
-.notif-banner { margin: 10px 20px 0; background: linear-gradient(135deg, rgba(124,106,247,.15), rgba(106,247,200,.1)); border: 1px solid rgba(124,106,247,.3); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.notif-banner.hidden { display: none; }
-.notif-icon { font-size: 22px; flex-shrink: 0; }
-.notif-text { flex: 1; font-size: 13px; line-height: 1.5; }
-.notif-text b { display: block; font-size: 14px; margin-bottom: 2px; }
-.notif-enable-btn { background: var(–accent); color: white; border: none; border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-
-/* Bill reminder card */
-.bill-card { display: flex; align-items: center; gap: 12px; background: var(–surface); border: 1px solid var(–border); border-radius: 14px; padding: 12px 15px; cursor: pointer; transition: all .2s; }
-.bill-card:active { transform: scale(.98); }
-.bill-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
-.bill-info { flex: 1; min-width: 0; }
-.bill-name { font-size: 14px; font-weight: 500; }
-.bill-due { font-size: 11px; margin-top: 2px; }
-.bill-amount { font-family: ‘Syne’, sans-serif; font-size: 15px; font-weight: 700; color: var(–danger); }
-.bill-status { font-size: 18px; }
-.due-soon { color: var(–accent4); }
-.overdue { color: var(–danger); }
-.paid { color: var(–accent3); }
-
+  /* "In my pocket" feature */
+  .pocket-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(106,247,200,.12); border: 1px solid rgba(106,247,200,.25); border-radius: 20px; padding: 5px 12px; margin-top: 8px; }
+  .pocket-chip span { font-size: 12px; color: var(--accent3); font-weight: 600; }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="screen">
 
-```
-<!-- ══════ TODAY ══════ -->
-<div id="page-today" class="page active">
-  <div class="greeting-block">
-    <div class="date-label" id="today-date"></div>
-    <h1 id="greeting-text">Good Morning ☀️</h1>
-    <div class="quote quote-anim" id="daily-quote"></div>
-  </div>
-
-  <!-- Progress Ring -->
-  <div class="progress-card">
-    <div class="ring-wrap">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <circle class="ring-bg" cx="40" cy="40" r="32"/>
-        <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"/>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-pct" id="ring-pct">0%</div>
-        <div class="ring-label">done</div>
+    <!-- ══════ TODAY ══════ -->
+    <div id="page-today" class="page active">
+      <div class="greeting-block">
+        <div class="date-label" id="today-date"></div>
+        <h1 id="greeting-text">Good Morning ☀️</h1>
+        <div class="quote quote-anim" id="daily-quote"></div>
       </div>
-    </div>
-    <div class="progress-info">
-      <h2 id="progress-label">Let's get started!</h2>
-      <p id="progress-sub">Complete your daily tasks</p>
-      <div class="mini-stats">
-        <div class="mini-stat"><b id="stat-done">0</b>Done</div>
-        <div class="mini-stat"><b id="stat-left">0</b>Left</div>
-        <div class="mini-stat"><b id="stat-streak">🔥0</b>Streak</div>
+
+      <!-- Progress Ring -->
+      <div class="progress-card">
+        <div class="ring-wrap">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle class="ring-bg" cx="40" cy="40" r="32"/>
+            <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-label">done</div>
+          </div>
+        </div>
+        <div class="progress-info">
+          <h2 id="progress-label">Let's get started!</h2>
+          <p id="progress-sub">Complete your daily tasks</p>
+          <div class="mini-stats">
+            <div class="mini-stat"><b id="stat-done">0</b>Done</div>
+            <div class="mini-stat"><b id="stat-left">0</b>Left</div>
+            <div class="mini-stat"><b id="stat-streak">🔥0</b>Streak</div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Mood check -->
-  <div class="section-label"><div class="dot" style="background:var(--accent4)"></div>How are you feeling?</div>
-  <div class="mood-row" id="mood-row">
-    <div class="mood-btn" data-mood="😔" onclick="setMood(this)">😔<span>Low</span></div>
-    <div class="mood-btn" data-mood="😐" onclick="setMood(this)">😐<span>Okay</span></div>
-    <div class="mood-btn" data-mood="🙂" onclick="setMood(this)">🙂<span>Good</span></div>
-    <div class="mood-btn" data-mood="😄" onclick="setMood(this)">😄<span>Great</span></div>
-    <div class="mood-btn" data-mood="🤩" onclick="setMood(this)">🤩<span>Amazing</span></div>
-  </div>
-
-  <!-- Active timer -->
-  <div class="timer-active-bar hidden" id="active-timer-bar">
-    <div>
-      <div class="timer-label" id="timer-task-name">Task running…</div>
-      <div class="timer-count" id="timer-display">00:00</div>
-    </div>
-    <button class="timer-stop" onclick="stopTimer()">✓ Done</button>
-  </div>
-
-  <!-- Task sections -->
-  <div id="tasks-container"></div>
-
-  <!-- Daily note -->
-  <div class="section-label"><div class="dot" style="background:var(--accent3)"></div>Daily Note</div>
-  <div class="note-card">
-    <textarea id="daily-note" rows="3" placeholder="Jot down thoughts for today…"></textarea>
-  </div>
-</div>
-
-<!-- ══════ HABITS ══════ -->
-<div id="page-habits" class="page">
-  <div class="page-header">
-    <h1>Habits 🌱</h1>
-    <p>Build consistency, one day at a time</p>
-  </div>
-  <div class="medals-row" id="medals-row"></div>
-  <div class="section-label"><div class="dot" style="background:var(--accent)"></div>Your Habits</div>
-  <div class="habit-grid" id="habit-grid"></div>
-</div>
-
-<!-- ══════ STATS ══════ -->
-<div id="page-stats" class="page">
-  <div class="page-header">
-    <h1>Stats 📊</h1>
-    <p>Your progress at a glance</p>
-  </div>
-  <div class="stats-grid" id="stats-grid"></div>
-</div>
-
-<!-- ══════ SETTINGS ══════ -->
-<div id="page-settings" class="page">
-  <div class="page-header">
-    <h1>Settings ⚙️</h1>
-    <p>Personalize your experience</p>
-  </div>
-  <div class="settings-list">
-    <div class="settings-item">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(124,106,247,.15)">🔔</div>
-        <div><div class="settings-label">Reminders</div><div class="settings-sub">Task notifications</div></div>
+      <!-- Mood check -->
+      <div class="section-label"><div class="dot" style="background:var(--accent4)"></div>How are you feeling?</div>
+      <div class="mood-row" id="mood-row">
+        <div class="mood-btn" data-mood="😔" onclick="setMood(this)">😔<span>Low</span></div>
+        <div class="mood-btn" data-mood="😐" onclick="setMood(this)">😐<span>Okay</span></div>
+        <div class="mood-btn" data-mood="🙂" onclick="setMood(this)">🙂<span>Good</span></div>
+        <div class="mood-btn" data-mood="😄" onclick="setMood(this)">😄<span>Great</span></div>
+        <div class="mood-btn" data-mood="🤩" onclick="setMood(this)">🤩<span>Amazing</span></div>
       </div>
-      <button class="toggle on" id="toggle-reminders" onclick="toggleSetting(this,'reminders')"></button>
-    </div>
-    <div class="settings-item" onclick="toggleDarkMode()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(106,247,200,.15)">🌙</div>
-        <div><div class="settings-label">Dark Mode</div><div class="settings-sub" id="dark-mode-sub">Currently: Dark</div></div>
-      </div>
-      <button class="toggle on" id="toggle-dark"></button>
-    </div>
-    <div class="settings-item" onclick="openGoalModal()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(247,212,106,.15)">🎯</div>
-        <div><div class="settings-label">Daily Goal</div><div class="settings-sub" id="goal-sub">Tap to set your daily task goal</div></div>
-      </div>
-      <span style="color:var(--accent4);font-size:18px">›</span>
-    </div>
-    <div class="settings-item" onclick="openCurrencyModal()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(106,247,200,.15)">💱</div>
-        <div><div class="settings-label">Currency</div><div class="settings-sub" id="currency-sub">US Dollar ($)</div></div>
-      </div>
-      <span style="color:var(--accent3);font-size:18px">›</span>
-    </div>
-    <!-- BACKUP SECTION -->
-    <div style="padding:4px 0 6px">
-      <div class="section-label" style="padding:10px 0 8px"><div class="dot" style="background:var(--accent3)"></div>Data Backup</div>
-    </div>
 
-    <!-- Export -->
-    <div class="settings-item" onclick="exportData()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(106,247,200,.15)">📤</div>
+      <!-- Active timer -->
+      <div class="timer-active-bar hidden" id="active-timer-bar">
         <div>
-          <div class="settings-label">Export Backup</div>
-          <div class="settings-sub">Save data as a file to Files app</div>
+          <div class="timer-label" id="timer-task-name">Task running…</div>
+          <div class="timer-count" id="timer-display">00:00</div>
+        </div>
+        <button class="timer-stop" onclick="stopTimer()">✓ Done</button>
+      </div>
+
+      <!-- Task sections -->
+      <div id="tasks-container"></div>
+
+      <!-- Daily note -->
+      <div class="section-label"><div class="dot" style="background:var(--accent3)"></div>Daily Note</div>
+      <div class="note-card">
+        <textarea id="daily-note" rows="3" placeholder="Jot down thoughts for today…"></textarea>
+      </div>
+    </div>
+
+    <!-- ══════ HABITS ══════ -->
+    <div id="page-habits" class="page">
+      <div class="page-header">
+        <h1>Habits 🌱</h1>
+        <p>Build consistency, one day at a time</p>
+      </div>
+      <div class="medals-row" id="medals-row"></div>
+      <div class="section-label"><div class="dot" style="background:var(--accent)"></div>Your Habits</div>
+      <div class="habit-grid" id="habit-grid"></div>
+    </div>
+
+    <!-- ══════ STATS ══════ -->
+    <div id="page-stats" class="page">
+      <div class="page-header">
+        <h1>Stats 📊</h1>
+        <p>Your progress at a glance</p>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+    </div>
+
+    <!-- ══════ SETTINGS ══════ -->
+    <div id="page-settings" class="page">
+      <div class="page-header">
+        <h1>Settings ⚙️</h1>
+        <p>Personalize your experience</p>
+      </div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(124,106,247,.15)">🔔</div>
+            <div><div class="settings-label">Reminders</div><div class="settings-sub">Task notifications</div></div>
+          </div>
+          <button class="toggle on" id="toggle-reminders" onclick="toggleSetting(this,'reminders')"></button>
+        </div>
+        <div class="settings-item" onclick="toggleDarkMode()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(106,247,200,.15)">🌙</div>
+            <div><div class="settings-label">Dark Mode</div><div class="settings-sub" id="dark-mode-sub">Currently: Dark</div></div>
+          </div>
+          <button class="toggle on" id="toggle-dark"></button>
+        </div>
+        <div class="settings-item" onclick="openGoalModal()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(247,212,106,.15)">🎯</div>
+            <div><div class="settings-label">Daily Goal</div><div class="settings-sub" id="goal-sub">Tap to set your daily task goal</div></div>
+          </div>
+          <span style="color:var(--accent4);font-size:18px">›</span>
+        </div>
+        <!-- BACKUP SECTION -->
+        <div style="padding:4px 0 6px">
+          <div class="section-label" style="padding:10px 0 8px"><div class="dot" style="background:var(--accent3)"></div>Data Backup</div>
+        </div>
+
+        <!-- Export -->
+        <div class="settings-item" onclick="exportData()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(106,247,200,.15)">📤</div>
+            <div>
+              <div class="settings-label">Export Backup</div>
+              <div class="settings-sub">Save data as a file to Files app</div>
+            </div>
+          </div>
+          <span style="color:var(--accent3);font-size:18px">›</span>
+        </div>
+
+        <!-- Import -->
+        <div class="settings-item" onclick="document.getElementById('import-file-input').click()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(124,106,247,.15)">📥</div>
+            <div>
+              <div class="settings-label">Import Backup</div>
+              <div class="settings-sub">Restore data from a backup file</div>
+            </div>
+          </div>
+          <span style="color:var(--accent);font-size:18px">›</span>
+        </div>
+        <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(event)">
+
+        <!-- Last backup info -->
+        <div style="margin:0 0 6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px">
+          <div style="font-size:20px">🕐</div>
+          <div>
+            <div style="font-size:13px;font-weight:500">Last Backup</div>
+            <div style="font-size:11px;color:var(--muted)" id="last-backup-label">Never — export to create one</div>
+          </div>
+        </div>
+
+        <!-- Auto-backup reminder -->
+        <div style="background:rgba(247,212,106,.07);border:1px solid rgba(247,212,106,.2);border-radius:14px;padding:12px 16px;font-size:12px;color:var(--accent4);line-height:1.6">
+          💡 <b>Tip:</b> Export a backup regularly and save it to iCloud Drive or Google Drive. If Safari data ever gets cleared, just import your backup to restore everything instantly.
+        </div>
+
+        <div class="settings-item" onclick="clearData()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(247,106,106,.15)">🗑️</div>
+            <div><div class="settings-label" style="color:var(--danger)">Reset All Data</div><div class="settings-sub">Cannot be undone</div></div>
+          </div>
+          <span style="color:var(--muted);font-size:18px">›</span>
+        </div>
+        <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">
+          DayFlow v1.0 · Your data is stored locally on this device 🔒
         </div>
       </div>
-      <span style="color:var(--accent3);font-size:18px">›</span>
     </div>
 
-    <!-- Import -->
-    <div class="settings-item" onclick="document.getElementById('import-file-input').click()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(124,106,247,.15)">📥</div>
-        <div>
-          <div class="settings-label">Import Backup</div>
-          <div class="settings-sub">Restore data from a backup file</div>
+    <!-- ══════ EXPENSE TRACKER ══════ -->
+    <div id="page-money" class="page">
+
+      <!-- Month selector -->
+      <div style="padding-top:52px"></div>
+      <div class="month-selector">
+        <button class="month-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="month-label" id="money-month-label">March 2026</div>
+        <button class="month-nav" onclick="changeMonth(1)">›</button>
+      </div>
+
+      <!-- Balance hero -->
+      <div class="balance-hero">
+        <div class="balance-label">Total Balance</div>
+        <div class="balance-amount"><span class="currency">$</span><span id="balance-val">0.00</span></div>
+        <div id="pocket-chip-wrap"></div>
+        <div class="balance-row">
+          <div class="balance-pill">
+            <div class="balance-pill-label">Income</div>
+            <div class="balance-pill-val income" id="total-income-val">$0.00</div>
+          </div>
+          <div class="balance-pill">
+            <div class="balance-pill-label">Expenses</div>
+            <div class="balance-pill-val expense" id="total-expense-val">$0.00</div>
+          </div>
         </div>
       </div>
-      <span style="color:var(--accent);font-size:18px">›</span>
-    </div>
-    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(event)">
 
-    <!-- Last backup info -->
-    <div style="margin:0 0 6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px">
-      <div style="font-size:20px">🕐</div>
-      <div>
-        <div style="font-size:13px;font-weight:500">Last Backup</div>
-        <div style="font-size:11px;color:var(--muted)" id="last-backup-label">Never — export to create one</div>
-      </div>
-    </div>
-
-    <!-- Auto-backup reminder -->
-    <div style="background:rgba(247,212,106,.07);border:1px solid rgba(247,212,106,.2);border-radius:14px;padding:12px 16px;font-size:12px;color:var(--accent4);line-height:1.6">
-      💡 <b>Tip:</b> Export a backup regularly and save it to iCloud Drive or Google Drive. If Safari data ever gets cleared, just import your backup to restore everything instantly.
-    </div>
-
-    <div class="settings-item" onclick="clearData()">
-      <div class="settings-item-left">
-        <div class="settings-icon" style="background:rgba(247,106,106,.15)">🗑️</div>
-        <div><div class="settings-label" style="color:var(--danger)">Reset All Data</div><div class="settings-sub">Cannot be undone</div></div>
-      </div>
-      <span style="color:var(--muted);font-size:18px">›</span>
-    </div>
-    <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">
-      DayFlow v1.0 · Your data is stored locally on this device 🔒
-    </div>
-  </div>
-</div>
-
-<!-- ══════ CALENDAR ══════ -->
-<div id="page-calendar" class="page">
-  <div class="cal-header">
-    <h1>Calendar 📅</h1>
-  </div>
-
-  <!-- Notification banner -->
-  <div class="notif-banner" id="notif-banner" onclick="requestNotifications()">
-    <div class="notif-icon">🔔</div>
-    <div class="notif-text">
-      <b>Enable Reminders</b>
-      Get notified for tasks & bill due dates
-    </div>
-    <button class="notif-enable-btn">Enable</button>
-  </div>
-
-  <!-- Month nav -->
-  <div class="cal-nav-row" style="margin-top:14px">
-    <button class="cal-nav-btn" onclick="changeCalMonth(-1)">‹</button>
-    <div class="cal-month-label" id="cal-month-label"></div>
-    <button class="cal-nav-btn" onclick="changeCalMonth(1)">›</button>
-  </div>
-
-  <!-- Day of week labels -->
-  <div class="cal-grid-wrap">
-    <div class="cal-day-labels">
-      <div class="cal-day-label">Su</div>
-      <div class="cal-day-label">Mo</div>
-      <div class="cal-day-label">Tu</div>
-      <div class="cal-day-label">We</div>
-      <div class="cal-day-label">Th</div>
-      <div class="cal-day-label">Fr</div>
-      <div class="cal-day-label">Sa</div>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-  </div>
-
-  <!-- Legend -->
-  <div class="cal-legend">
-    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent3);opacity:.6"></div>All tasks done</div>
-    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent);opacity:.4"></div>Partial</div>
-    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent2);border-radius:50%"></div>Has expense</div>
-  </div>
-
-  <!-- Selected day detail -->
-  <div class="cal-detail" id="cal-detail">
-    <div style="color:var(--muted);font-size:13px;text-align:center;padding:10px 0">Tap a day to see details</div>
-  </div>
-
-  <div style="height:20px"></div>
-</div>
-
-<!-- ══════ EXPENSE TRACKER ══════ -->
-<div id="page-money" class="page">
-
-  <!-- Month selector -->
-  <div style="padding-top:52px"></div>
-  <div class="month-selector">
-    <button class="month-nav" onclick="changeMonth(-1)">‹</button>
-    <div class="month-label" id="money-month-label">March 2026</div>
-    <button class="month-nav" onclick="changeMonth(1)">›</button>
-  </div>
-
-  <!-- Balance hero -->
-  <div class="balance-hero">
-    <div class="balance-label">Total Balance</div>
-    <div class="balance-amount"><span class="currency" id="balance-currency-sym">$</span><span id="balance-val">0.00</span></div>
-    <div id="pocket-chip-wrap"></div>
-    <div class="balance-row">
-      <div class="balance-pill">
-        <div class="balance-pill-label">Income</div>
-        <div class="balance-pill-val income" id="total-income-val">$0.00</div>
-      </div>
-      <div class="balance-pill">
-        <div class="balance-pill-label">Expenses</div>
-        <div class="balance-pill-val expense" id="total-expense-val">$0.00</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Budget progress -->
-  <div class="budget-bar-card" id="budget-bar-wrap">
-    <div class="budget-bar-top">
-      <div class="budget-bar-title">Monthly Budget</div>
-      <div class="budget-bar-pct" id="budget-pct-label">0%</div>
-    </div>
-    <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%;background:var(--accent3)"></div></div>
-    <div class="budget-sub">
-      <span id="budget-spent-label">$0 spent</span>
-      <span id="budget-limit-label">of $0 budget</span>
-    </div>
-  </div>
-
-  <!-- Spending by category donut -->
-  <div class="donut-card">
-    <h3>Spending by Category</h3>
-    <div class="donut-wrap">
-      <div class="donut-svg-wrap">
-        <svg width="110" height="110" viewBox="0 0 110 110" id="donut-svg">
-          <circle cx="55" cy="55" r="42" fill="none" stroke="var(--border)" stroke-width="14"/>
-        </svg>
-        <div class="donut-center">
-          <div class="donut-center-val" id="donut-center-val">$0</div>
-          <div class="donut-center-label">spent</div>
+      <!-- Budget progress -->
+      <div class="budget-bar-card" id="budget-bar-wrap">
+        <div class="budget-bar-top">
+          <div class="budget-bar-title">Monthly Budget</div>
+          <div class="budget-bar-pct" id="budget-pct-label">0%</div>
+        </div>
+        <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%;background:var(--accent3)"></div></div>
+        <div class="budget-sub">
+          <span id="budget-spent-label">$0 spent</span>
+          <span id="budget-limit-label">of $0 budget</span>
         </div>
       </div>
-      <div class="donut-legend" id="donut-legend"></div>
+
+      <!-- Spending by category donut -->
+      <div class="donut-card">
+        <h3>Spending by Category</h3>
+        <div class="donut-wrap">
+          <div class="donut-svg-wrap">
+            <svg width="110" height="110" viewBox="0 0 110 110" id="donut-svg">
+              <circle cx="55" cy="55" r="42" fill="none" stroke="var(--border)" stroke-width="14"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-val" id="donut-center-val">$0</div>
+              <div class="donut-center-label">spent</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+
+      <!-- 7-day spending trend -->
+      <div class="trend-card">
+        <h3>7-Day Spending</h3>
+        <div class="trend-bars" id="trend-bars"></div>
+      </div>
+
+      <!-- Savings goals -->
+      <div class="savings-card" id="savings-card-wrap"></div>
+
+      <!-- Filter pills -->
+      <div class="section-label"><div class="dot" style="background:var(--accent2)"></div>Transactions</div>
+      <div class="filter-scroll" id="txn-filter-row">
+        <div class="filter-pill active" onclick="filterTxns('all',this)">All</div>
+        <div class="filter-pill" onclick="filterTxns('food',this)">🍔 Food</div>
+        <div class="filter-pill" onclick="filterTxns('transport',this)">🚗 Transport</div>
+        <div class="filter-pill" onclick="filterTxns('shopping',this)">🛍 Shopping</div>
+        <div class="filter-pill" onclick="filterTxns('health',this)">💊 Health</div>
+        <div class="filter-pill" onclick="filterTxns('entertainment',this)">🎬 Entertainment</div>
+        <div class="filter-pill" onclick="filterTxns('bills',this)">⚡ Bills</div>
+        <div class="filter-pill" onclick="filterTxns('income',this)">💰 Income</div>
+        <div class="filter-pill" onclick="filterTxns('other',this)">📦 Other</div>
+      </div>
+
+      <!-- Transaction list -->
+      <div style="height:10px"></div>
+      <div class="txn-list" id="txn-list"></div>
+      <div style="height:20px"></div>
     </div>
-  </div>
-
-  <!-- 7-day spending trend -->
-  <div class="trend-card">
-    <h3>7-Day Spending</h3>
-    <div class="trend-bars" id="trend-bars"></div>
-  </div>
-
-  <!-- Savings goals -->
-  <div class="savings-card" id="savings-card-wrap"></div>
-
-  <!-- Bill Reminders -->
-  <div class="section-label"><div class="dot" style="background:var(--danger)"></div>Bill Reminders</div>
-  <div style="padding:0 20px;display:flex;flex-direction:column;gap:8px" id="bills-list"></div>
-
-  <!-- Transactions -->
-  <div class="section-label"><div class="dot" style="background:var(--accent2)"></div>Transactions</div>
-  <div class="filter-scroll" id="txn-filter-row">
-    <div class="filter-pill active" onclick="filterTxns('all',this)">All</div>
-    <div class="filter-pill" onclick="filterTxns('food',this)">🍔 Food</div>
-    <div class="filter-pill" onclick="filterTxns('transport',this)">🚗 Transport</div>
-    <div class="filter-pill" onclick="filterTxns('shopping',this)">🛍 Shopping</div>
-    <div class="filter-pill" onclick="filterTxns('health',this)">💊 Health</div>
-    <div class="filter-pill" onclick="filterTxns('entertainment',this)">🎬 Entertainment</div>
-    <div class="filter-pill" onclick="filterTxns('bills',this)">⚡ Bills</div>
-    <div class="filter-pill" onclick="filterTxns('income',this)">💰 Income</div>
-    <div class="filter-pill" onclick="filterTxns('other',this)">📦 Other</div>
-  </div>
-
-  <!-- Transaction list -->
-  <div style="height:10px"></div>
-  <div class="txn-list" id="txn-list"></div>
-  <div style="height:20px"></div>
-</div>
-```
 
   </div><!-- /screen -->
 
   <!-- FAB -->
-
-<button class="fab" onclick="handleFab()" id="fab-btn">+</button>
+  <button class="fab" onclick="handleFab()" id="fab-btn">+</button>
 
   <!-- Bottom nav -->
-
   <nav id="nav">
     <button class="nav-btn active" onclick="showPage('today',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -729,10 +597,6 @@ NOTIFICATION STYLES
     <button class="nav-btn" onclick="showPage('habits',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01z"/></svg>
       <span>Habits</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('calendar',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
-      <span>Calendar</span>
     </button>
     <button class="nav-btn" onclick="showPage('stats',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -750,7 +614,6 @@ NOTIFICATION STYLES
 </div>
 
 <!-- Add Task Modal -->
-
 <div class="modal-backdrop" id="add-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -824,7 +687,6 @@ NOTIFICATION STYLES
 </div>
 
 <!-- Add/Edit Habit Modal -->
-
 <div class="modal-backdrop" id="habit-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -876,7 +738,6 @@ NOTIFICATION STYLES
 </div>
 
 <!-- Add Expense/Income Modal -->
-
 <div class="modal-backdrop" id="money-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -922,7 +783,6 @@ NOTIFICATION STYLES
 </div>
 
 <!-- Budget Setup Modal -->
-
 <div class="modal-backdrop" id="budget-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -951,7 +811,6 @@ NOTIFICATION STYLES
 </div>
 
 <!-- Daily Goal Modal -->
-
 <div class="modal-backdrop" id="goal-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -973,69 +832,6 @@ NOTIFICATION STYLES
     <div class="btn-row">
       <button class="btn-ghost" onclick="closeModal('goal-modal')">Cancel</button>
       <button class="btn-primary" onclick="saveGoal()">Save Goal</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Bill Modal -->
-
-<div class="modal-backdrop" id="bill-modal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h2 id="bill-modal-title">Add Bill Reminder</h2>
-    <div class="form-group">
-      <label>Bill Name</label>
-      <input type="text" id="bill-name-input" placeholder="e.g. Netflix, Rent, Electricity" maxlength="40">
-    </div>
-    <div class="form-group">
-      <label>Amount</label>
-      <input type="number" id="bill-amount-input" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal">
-    </div>
-    <div class="form-group">
-      <label>Due Day of Month</label>
-      <input type="number" id="bill-day-input" placeholder="e.g. 15" min="1" max="31" inputmode="numeric">
-    </div>
-    <div class="form-group">
-      <label>Category</label>
-      <select id="bill-cat-input">
-        <option value="bills">⚡ Utilities</option>
-        <option value="entertainment">🎬 Subscription</option>
-        <option value="health">💊 Health/Insurance</option>
-        <option value="transport">🚗 Transport</option>
-        <option value="other">📦 Other</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Emoji</label>
-      <div class="emoji-picker" id="bill-emoji-picker">
-        <span class="emoji-opt selected" onclick="selectBillEmoji(this)">⚡</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">🏠</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">📱</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">🎬</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">💊</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">🚗</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">🌐</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">💳</span>
-        <span class="emoji-opt" onclick="selectBillEmoji(this)">🎵</span>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn-ghost" onclick="closeModal('bill-modal')">Cancel</button>
-      <button class="btn-primary" onclick="saveBill()">Save Bill</button>
-    </div>
-    <div style="margin-top:10px" id="delete-bill-wrap"></div>
-  </div>
-</div>
-
-<!-- Currency Modal -->
-
-<div class="modal-backdrop" id="currency-modal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h2>Select Currency 💱</h2>
-    <div style="display:flex;flex-direction:column;gap:8px;max-height:60dvh;overflow-y:auto" id="currency-list"></div>
-    <div class="btn-row" style="margin-top:16px">
-      <button class="btn-ghost" onclick="closeModal('currency-modal')">Cancel</button>
     </div>
   </div>
 </div>
@@ -1110,7 +906,6 @@ function getDefaultState() {
     transactions: [],
     budget: 0,
     savingsGoals: [],
-    bills: [],
   };
 }
 
@@ -1141,11 +936,6 @@ function init() {
   updateLastBackupLabel();
   applyDarkMode();
   updateGoalSub();
-  updateCurrencySub();
-  checkNotifBanner();
-  renderBills();
-  scheduleTaskNotifications();
-  scheduleBillNotifications();
   setInterval(updateTimerDisplay, 1000);
   // daily note autosave
   document.getElementById('daily-note').addEventListener('input', function() {
@@ -1914,7 +1704,6 @@ function showPage(name, btn) {
   if (name === 'stats') renderStats();
   if (name === 'habits') { renderHabits(); renderMedals(); }
   if (name === 'money') renderMoney();
-  if (name === 'calendar') renderCalendar();
 
   // Change FAB based on page
   const fab = document.getElementById('fab-btn');
@@ -1967,7 +1756,7 @@ function changeMonth(dir) {
   renderMoney();
 }
 
-function fmt(n) { return getCurrencySymbol() + Math.abs(n).toFixed(2); }
+function fmt(n) { return '$' + Math.abs(n).toFixed(2); }
 
 function renderMoney() {
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1979,7 +1768,6 @@ function renderMoney() {
   const balance = income - expense;
 
   document.getElementById('balance-val').textContent = balance.toFixed(2);
-  document.getElementById('balance-currency-sym').textContent = getCurrencySymbol();
   document.getElementById('total-income-val').textContent  = fmt(income);
   document.getElementById('total-expense-val').textContent = fmt(expense);
 
@@ -2263,7 +2051,6 @@ function saveBudget() {
 function handleFab() {
   if (currentPage === 'money') { openAddTxn(); return; }
   if (currentPage === 'habits') { openHabitModal(); return; }
-  if (currentPage === 'calendar') { openAddModal(); return; }
   openAddModal();
 }
 
@@ -2416,414 +2203,9 @@ function updateGoalSub() {
 }
 
 // ═══════════════════════════════════════════════
-//  CURRENCIES
-// ═══════════════════════════════════════════════
-const CURRENCIES = [
-  { code:'USD', symbol:'$',  name:'US Dollar' },
-  { code:'EUR', symbol:'€',  name:'Euro' },
-  { code:'GBP', symbol:'£',  name:'British Pound' },
-  { code:'INR', symbol:'₹',  name:'Indian Rupee' },
-  { code:'JPY', symbol:'¥',  name:'Japanese Yen' },
-  { code:'CAD', symbol:'CA$',name:'Canadian Dollar' },
-  { code:'AUD', symbol:'A$', name:'Australian Dollar' },
-  { code:'CNY', symbol:'¥',  name:'Chinese Yuan' },
-  { code:'CHF', symbol:'Fr', name:'Swiss Franc' },
-  { code:'KRW', symbol:'₩',  name:'South Korean Won' },
-  { code:'BRL', symbol:'R$', name:'Brazilian Real' },
-  { code:'MXN', symbol:'MX$',name:'Mexican Peso' },
-  { code:'SGD', symbol:'S$', name:'Singapore Dollar' },
-  { code:'AED', symbol:'د.إ',name:'UAE Dirham' },
-  { code:'SAR', symbol:'﷼',  name:'Saudi Riyal' },
-  { code:'PHP', symbol:'₱',  name:'Philippine Peso' },
-  { code:'IDR', symbol:'Rp', name:'Indonesian Rupiah' },
-  { code:'MYR', symbol:'RM', name:'Malaysian Ringgit' },
-  { code:'THB', symbol:'฿',  name:'Thai Baht' },
-  { code:'NGN', symbol:'₦',  name:'Nigerian Naira' },
-];
-
-function getCurrencySymbol() {
-  const code = (state.settings && state.settings.currency) || 'USD';
-  return CURRENCIES.find(c => c.code === code)?.symbol || '$';
-}
-
-function openCurrencyModal() {
-  const list = document.getElementById('currency-list');
-  const current = (state.settings && state.settings.currency) || 'USD';
-  list.innerHTML = CURRENCIES.map(c => `
-    <div onclick="setCurrency('${c.code}',this)" style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1.5px solid ${current===c.code?'var(--accent)':'var(--border)'};border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .15s">
-      <div>
-        <div style="font-size:14px;font-weight:500">${c.name}</div>
-        <div style="font-size:11px;color:var(--muted)">${c.code}</div>
-      </div>
-      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:${current===c.code?'var(--accent)':'var(--muted)'}">${c.symbol}</div>
-    </div>`).join('');
-  openModal('currency-modal');
-}
-
-function setCurrency(code, el) {
-  state.settings = state.settings || {};
-  state.settings.currency = code;
-  saveState();
-  updateCurrencySub();
-  closeModal('currency-modal');
-  renderMoney();
-  toast(`💱 Currency set to ${code}`);
-}
-
-function updateCurrencySub() {
-  const el = document.getElementById('currency-sub');
-  if (!el) return;
-  const code = (state.settings && state.settings.currency) || 'USD';
-  const cur = CURRENCIES.find(c => c.code === code);
-  if (cur) el.textContent = `${cur.name} (${cur.symbol})`;
-}
-
-// ═══════════════════════════════════════════════
-//  BILL REMINDERS
-// ═══════════════════════════════════════════════
-let selectedBillEmoji = '⚡';
-let editingBillId = null;
-
-function selectBillEmoji(el) {
-  document.querySelectorAll('#bill-emoji-picker .emoji-opt').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedBillEmoji = el.textContent;
-}
-
-function openAddBill() {
-  editingBillId = null;
-  selectedBillEmoji = '⚡';
-  document.getElementById('bill-modal-title').textContent = 'Add Bill Reminder';
-  document.getElementById('bill-name-input').value = '';
-  document.getElementById('bill-amount-input').value = '';
-  document.getElementById('bill-day-input').value = '';
-  document.getElementById('bill-cat-input').value = 'bills';
-  document.getElementById('delete-bill-wrap').innerHTML = '';
-  document.querySelectorAll('#bill-emoji-picker .emoji-opt').forEach(e => e.classList.toggle('selected', e.textContent === '⚡'));
-  openModal('bill-modal');
-}
-
-function saveBill() {
-  const name = document.getElementById('bill-name-input').value.trim();
-  const amount = parseFloat(document.getElementById('bill-amount-input').value);
-  const day = parseInt(document.getElementById('bill-day-input').value);
-  if (!name) { toast('⚠️ Enter bill name'); return; }
-  if (!amount || amount <= 0) { toast('⚠️ Enter valid amount'); return; }
-  if (!day || day < 1 || day > 31) { toast('⚠️ Enter valid due day (1-31)'); return; }
-
-  if (!state.bills) state.bills = [];
-  const bill = {
-    id: editingBillId || Date.now(),
-    emoji: selectedBillEmoji,
-    name,
-    amount,
-    dueDay: day,
-    cat: document.getElementById('bill-cat-input').value,
-    paidMonths: editingBillId ? (state.bills.find(b=>b.id===editingBillId)?.paidMonths || []) : [],
-  };
-
-  if (editingBillId) {
-    const idx = state.bills.findIndex(b => b.id === editingBillId);
-    state.bills[idx] = bill;
-    toast('✏️ Bill updated!');
-  } else {
-    state.bills.push(bill);
-    toast('📅 Bill reminder added!');
-  }
-  saveState();
-  closeModal('bill-modal');
-  renderBills();
-  scheduleBillNotifications();
-}
-
-function deleteBill(id) {
-  if (confirm('Delete this bill reminder?')) {
-    state.bills = (state.bills || []).filter(b => b.id !== id);
-    saveState();
-    closeModal('bill-modal');
-    renderBills();
-    toast('🗑 Bill deleted');
-  }
-}
-
-function toggleBillPaid(id) {
-  const bill = (state.bills || []).find(b => b.id === id);
-  if (!bill) return;
-  const now = new Date();
-  const key = `${now.getFullYear()}-${now.getMonth()}`;
-  if (!bill.paidMonths) bill.paidMonths = [];
-  if (bill.paidMonths.includes(key)) {
-    bill.paidMonths = bill.paidMonths.filter(k => k !== key);
-    toast(`↩ ${bill.name} marked unpaid`);
-  } else {
-    bill.paidMonths.push(key);
-    // Auto-add as expense transaction
-    const sym = getCurrencySymbol();
-    state.transactions = state.transactions || [];
-    state.transactions.push({
-      id: Date.now(),
-      type: 'expense',
-      amount: bill.amount,
-      desc: bill.name,
-      cat: bill.cat,
-      date: new Date().toISOString().slice(0,10),
-      note: 'Auto from bill reminder',
-    });
-    saveState();
-    renderMoney();
-    toast(`✅ ${bill.name} paid & logged!`);
-  }
-  saveState();
-  renderBills();
-}
-
-function getBillStatus(bill) {
-  const now = new Date();
-  const key = `${now.getFullYear()}-${now.getMonth()}`;
-  if (bill.paidMonths && bill.paidMonths.includes(key)) return 'paid';
-  const today = now.getDate();
-  const diff = bill.dueDay - today;
-  if (diff < 0) return 'overdue';
-  if (diff <= 3) return 'due-soon';
-  return 'upcoming';
-}
-
-function renderBills() {
-  const list = document.getElementById('bills-list');
-  if (!list) return;
-  const bills = state.bills || [];
-  const sym = getCurrencySymbol();
-  if (!bills.length) {
-    list.innerHTML = `<div class="empty-state" style="padding:20px"><div class="big-emoji">📅</div><p>No bill reminders yet.<br>Tap + to add one!</p></div>
-      <button onclick="openAddBill()" style="margin:0 auto;display:block;background:rgba(247,106,106,.12);color:var(--danger);border:1px solid rgba(247,106,106,.25);border-radius:12px;padding:10px 20px;font-size:13px;cursor:pointer">+ Add Bill</button>`;
-    return;
-  }
-  const sorted = [...bills].sort((a,b) => a.dueDay - b.dueDay);
-  list.innerHTML = sorted.map(bill => {
-    const status = getBillStatus(bill);
-    const statusEmoji = status==='paid'?'✅':status==='overdue'?'🔴':status==='due-soon'?'🟡':'🔵';
-    const statusText = status==='paid'?'Paid':'due-soon'?'Due soon':status==='overdue'?'Overdue':`Due ${bill.dueDay}${getDaySuffix(bill.dueDay)}`;
-    return `<div class="bill-card" onclick="editBill(${bill.id})">
-      <div class="bill-icon" style="background:rgba(247,106,106,.12)">${bill.emoji}</div>
-      <div class="bill-info">
-        <div class="bill-name">${bill.name}</div>
-        <div class="bill-due ${status==='paid'?'paid':status==='overdue'?'overdue':status==='due-soon'?'due-soon':''}">${statusEmoji} ${statusText}</div>
-      </div>
-      <div class="bill-amount">${sym}${bill.amount.toFixed(2)}</div>
-      <div class="bill-status" onclick="event.stopPropagation();toggleBillPaid(${bill.id})" style="cursor:pointer;padding-left:8px">${status==='paid'?'✅':'⬜'}</div>
-    </div>`;
-  }).join('') + `<button onclick="openAddBill()" style="width:100%;background:rgba(247,106,106,.08);color:var(--danger);border:1px dashed rgba(247,106,106,.3);border-radius:12px;padding:10px;font-size:13px;cursor:pointer;margin-top:4px">+ Add Bill</button>`;
-}
-
-function getDaySuffix(d) {
-  if (d>=11&&d<=13) return 'th';
-  return ['th','st','nd','rd','th'][Math.min(d%10,4)];
-}
-
-function editBill(id) {
-  const bill = (state.bills || []).find(b => b.id === id);
-  if (!bill) return;
-  editingBillId = id;
-  selectedBillEmoji = bill.emoji;
-  document.getElementById('bill-modal-title').textContent = 'Edit Bill';
-  document.getElementById('bill-name-input').value = bill.name;
-  document.getElementById('bill-amount-input').value = bill.amount;
-  document.getElementById('bill-day-input').value = bill.dueDay;
-  document.getElementById('bill-cat-input').value = bill.cat;
-  document.querySelectorAll('#bill-emoji-picker .emoji-opt').forEach(e => e.classList.toggle('selected', e.textContent === selectedBillEmoji));
-  document.getElementById('delete-bill-wrap').innerHTML = `<button class="btn-danger" style="width:100%" onclick="deleteBill(${id})">🗑 Delete Bill</button>`;
-  openModal('bill-modal');
-}
-
-// ═══════════════════════════════════════════════
-//  NOTIFICATIONS
-// ═══════════════════════════════════════════════
-function requestNotifications() {
-  if (!('Notification' in window)) {
-    toast('❌ Notifications not supported in this browser');
-    return;
-  }
-  Notification.requestPermission().then(perm => {
-    if (perm === 'granted') {
-      state.settings = state.settings || {};
-      state.settings.notifications = true;
-      saveState();
-      document.getElementById('notif-banner').classList.add('hidden');
-      toast('🔔 Notifications enabled!');
-      scheduleTaskNotifications();
-      scheduleBillNotifications();
-    } else {
-      toast('⚠️ Permission denied. Enable in phone settings.');
-    }
-  });
-}
-
-function checkNotifBanner() {
-  const banner = document.getElementById('notif-banner');
-  if (!banner) return;
-  if (!('Notification' in window) || Notification.permission === 'granted') {
-    banner.classList.add('hidden');
-  }
-}
-
-function scheduleTaskNotifications() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const tasks = getTasksForToday().filter(t => !t.done && t.time);
-  tasks.forEach(task => {
-    const [h, m] = task.time.split(':').map(Number);
-    const now = new Date();
-    const taskTime = new Date();
-    taskTime.setHours(h, m, 0, 0);
-    const diff = taskTime - now;
-    if (diff > 0 && diff < 86400000) {
-      setTimeout(() => {
-        if (!task.done) {
-          new Notification(`⏰ Time for: ${task.name}`, {
-            body: `Scheduled at ${formatTime(task.time)} · ${task.duration}min`,
-            icon: '📱',
-            tag: `task-${task.id}`,
-          });
-        }
-      }, diff);
-    }
-  });
-}
-
-function scheduleBillNotifications() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const bills = state.bills || [];
-  const now = new Date();
-  bills.forEach(bill => {
-    const status = getBillStatus(bill);
-    if (status === 'due-soon' || status === 'overdue') {
-      const sym = getCurrencySymbol();
-      setTimeout(() => {
-        new Notification(`💳 Bill ${status === 'overdue' ? 'Overdue' : 'Due Soon'}: ${bill.name}`, {
-          body: `${sym}${bill.amount.toFixed(2)} due on ${bill.dueDay}${getDaySuffix(bill.dueDay)}`,
-          icon: '📅',
-          tag: `bill-${bill.id}`,
-        });
-      }, 3000); // show shortly after app opens
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════
-//  CALENDAR
-// ═══════════════════════════════════════════════
-let calMonth = new Date().getMonth();
-let calYear  = new Date().getFullYear();
-let selectedCalDay = null;
-
-function changeCalMonth(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0)  { calMonth = 11; calYear--; }
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-month-label').textContent = `${months[calMonth]} ${calYear}`;
-
-  const grid = document.getElementById('cal-grid');
-  grid.innerHTML = '';
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const todayStr = new Date().toISOString().slice(0,10);
-
-  // Empty cells before first day
-  for (let i = 0; i < firstDay; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'cal-cell empty';
-    grid.appendChild(cell);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const cell = document.createElement('div');
-    cell.className = 'cal-cell';
-
-    const completed = state.completedDays[dateStr] || [];
-    const totalTasks = state.tasks.filter(t => t.repeat !== 'once' || t.createdAt === dateStr).length;
-    const hasExpense = (state.transactions || []).some(t => t.date === dateStr && t.type === 'expense');
-
-    if (dateStr === todayStr) cell.classList.add('today-cell');
-    else if (completed.length > 0 && totalTasks > 0) {
-      if (completed.length >= totalTasks) cell.classList.add('full-day');
-      else cell.classList.add('partial-day');
-    }
-    if (selectedCalDay === dateStr) cell.classList.add('selected-day');
-
-    const dotRow = hasExpense ? `<div class="cal-dot-row"><div class="cal-dot" style="background:var(--accent2)"></div></div>` : '';
-    cell.innerHTML = `<div class="cal-num">${d}</div>${dotRow}`;
-    cell.addEventListener('click', () => selectCalDay(dateStr));
-    grid.appendChild(cell);
-  }
-
-  if (selectedCalDay) renderCalDetail(selectedCalDay);
-}
-
-function selectCalDay(dateStr) {
-  selectedCalDay = dateStr;
-  renderCalendar();
-  renderCalDetail(dateStr);
-}
-
-function renderCalDetail(dateStr) {
-  const detail = document.getElementById('cal-detail');
-  const d = new Date(dateStr + 'T12:00:00');
-  const label = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-
-  const completed = state.completedDays[dateStr] || [];
-  const mood = state.mood[dateStr];
-  const note = state.notes[dateStr];
-  const expenses = (state.transactions || []).filter(t => t.date === dateStr && t.type === 'expense');
-  const sym = getCurrencySymbol();
-  const totalSpent = expenses.reduce((s,t) => s+t.amount, 0);
-
-  // Find tasks done that day
-  const tasksDone = state.tasks.filter(t => completed.includes(t.id));
-  const tasksMissed = state.tasks.filter(t => !completed.includes(t.id) && (t.repeat !== 'once' || t.createdAt === dateStr));
-
-  let html = `<h3>${label}</h3>`;
-
-  // Mood + note summary
-  if (mood || note) {
-    html += `<div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">`;
-    if (mood) html += `<div style="background:var(--surface2);border-radius:10px;padding:6px 12px;font-size:13px">${mood} Mood</div>`;
-    if (totalSpent > 0) html += `<div style="background:rgba(247,106,106,.1);border-radius:10px;padding:6px 12px;font-size:13px;color:var(--danger)">💸 ${sym}${totalSpent.toFixed(2)}</div>`;
-    html += `</div>`;
-  }
-
-  if (note) html += `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px;padding:8px 10px;background:var(--surface2);border-radius:10px">"${note}"</div>`;
-
-  if (tasksDone.length) {
-    html += `<div style="font-size:11px;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">✅ Completed</div>`;
-    tasksDone.forEach(t => {
-      html += `<div class="cal-detail-row"><div class="cal-detail-emoji">${t.emoji}</div><div class="cal-detail-name">${t.name}</div><div class="cal-detail-check">✅</div></div>`;
-    });
-  }
-  if (tasksMissed.length && dateStr < new Date().toISOString().slice(0,10)) {
-    html += `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:8px 0 6px">⬜ Missed</div>`;
-    tasksMissed.forEach(t => {
-      html += `<div class="cal-detail-row" style="opacity:.5"><div class="cal-detail-emoji">${t.emoji}</div><div class="cal-detail-name">${t.name}</div><div class="cal-detail-check">⬜</div></div>`;
-    });
-  }
-  if (!tasksDone.length && !tasksMissed.length) {
-    html += `<div style="color:var(--muted);font-size:13px;text-align:center;padding:10px 0">No task data for this day</div>`;
-  }
-
-  detail.innerHTML = html;
-  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-// ═══════════════════════════════════════════════
 //  START
 // ═══════════════════════════════════════════════
 init();
 </script>
-
 </body>
 </html>
