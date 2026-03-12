@@ -1602,6 +1602,8 @@ function saveHabit() {
 
 function openModal(id) {
   document.getElementById(id).classList.add('open');
+  // Always sync currency symbols so modals show the correct one on mobile
+  updateCurrencyLabels();
   // Lock page scroll on iOS — prevents background dragging
   document.body.style.overflow = 'hidden';
   document.body.style.position = 'fixed';
@@ -2339,19 +2341,20 @@ function selectCurrency(code) {
   toast(`💱 Currency set to ${c ? c.name : code}`);
 }
 
-function updateCurrencySub() {
-  const code = (state.settings && state.settings.currency) || 'USD';
-  const c = CURRENCIES.find(c => c.code === code);
-  const sym = c ? c.sym : code;
-
-  const el = document.getElementById('currency-sub');
-  if (el) el.textContent = c ? `${c.name} (${sym})` : code;
-
-  // Sync all currency symbol labels across the app
+function updateCurrencyLabels() {
+  const sym = getCurrencySymbol();
   ['balance-currency-sym', 'txn-amount-currency-sym', 'budget-amount-currency-sym', 'savings-target-currency-sym', 'savings-saved-currency-sym'].forEach(id => {
     const node = document.getElementById(id);
     if (node) node.textContent = sym;
   });
+}
+
+function updateCurrencySub() {
+  const code = (state.settings && state.settings.currency) || 'USD';
+  const c = CURRENCIES.find(c => c.code === code);
+  const el = document.getElementById('currency-sub');
+  if (el) el.textContent = c ? `${c.name} (${c.sym})` : code;
+  updateCurrencyLabels();
 }
 
 // ═══════════════════════════════════════════════
