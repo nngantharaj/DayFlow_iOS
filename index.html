@@ -813,11 +813,11 @@
       <input type="text" id="goal-name-input" placeholder="e.g. New iPhone" maxlength="30">
     </div>
     <div class="form-group">
-      <label>Savings Goal Target ($)</label>
+      <label>Savings Goal Target (<span id="savings-target-currency-sym">$</span>)</label>
       <input type="number" id="goal-target-input" placeholder="e.g. 1200" min="1" inputmode="decimal">
     </div>
     <div class="form-group">
-      <label>Already Saved ($)</label>
+      <label>Already Saved (<span id="savings-saved-currency-sym">$</span>)</label>
       <input type="number" id="goal-saved-input" placeholder="0" min="0" inputmode="decimal" value="0">
     </div>
     <div class="btn-row">
@@ -2348,7 +2348,7 @@ function updateCurrencySub() {
   if (el) el.textContent = c ? `${c.name} (${sym})` : code;
 
   // Sync all currency symbol labels across the app
-  ['balance-currency-sym', 'txn-amount-currency-sym', 'budget-amount-currency-sym'].forEach(id => {
+  ['balance-currency-sym', 'txn-amount-currency-sym', 'budget-amount-currency-sym', 'savings-target-currency-sym', 'savings-saved-currency-sym'].forEach(id => {
     const node = document.getElementById(id);
     if (node) node.textContent = sym;
   });
