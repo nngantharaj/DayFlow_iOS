@@ -418,12 +418,15 @@
         <p>Personalize your experience</p>
       </div>
       <div class="settings-list">
-        <div class="settings-item">
+        <div class="settings-item" onclick="handleReminderToggle()">
           <div class="settings-item-left">
             <div class="settings-icon" style="background:rgba(124,106,247,.15)">🔔</div>
-            <div><div class="settings-label">Reminders</div><div class="settings-sub">Task notifications</div></div>
+            <div>
+              <div class="settings-label">Reminders</div>
+              <div class="settings-sub" id="reminder-sub">Tap to enable task notifications</div>
+            </div>
           </div>
-          <button class="toggle on" id="toggle-reminders" onclick="toggleSetting(this,'reminders')"></button>
+          <button class="toggle" id="toggle-reminders"></button>
         </div>
         <div class="settings-item" onclick="toggleDarkMode()">
           <div class="settings-item-left">
@@ -438,6 +441,16 @@
             <div><div class="settings-label">Daily Goal</div><div class="settings-sub" id="goal-sub">Tap to set your daily task goal</div></div>
           </div>
           <span style="color:var(--accent4);font-size:18px">›</span>
+        </div>
+        <div class="settings-item" onclick="openCurrencyModal()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(106,247,200,.15)">💱</div>
+            <div>
+              <div class="settings-label">Currency</div>
+              <div class="settings-sub" id="currency-sub">US Dollar ($)</div>
+            </div>
+          </div>
+          <span style="color:var(--accent3);font-size:18px">›</span>
         </div>
         <!-- BACKUP SECTION -->
         <div style="padding:4px 0 6px">
@@ -510,7 +523,7 @@
       <!-- Balance hero -->
       <div class="balance-hero">
         <div class="balance-label">Total Balance</div>
-        <div class="balance-amount"><span class="currency">$</span><span id="balance-val">0.00</span></div>
+        <div class="balance-amount"><span class="currency" id="balance-currency-sym">$</span><span id="balance-val">0.00</span></div>
         <div id="pocket-chip-wrap"></div>
         <div class="balance-row">
           <div class="balance-pill">
@@ -836,6 +849,19 @@
   </div>
 </div>
 
+<!-- Currency Modal -->
+<div class="modal-backdrop" id="currency-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Choose Currency 💱</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">All amounts in the Money tab will use this currency symbol.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:55dvh;overflow-y:auto;padding-right:4px" id="currency-list"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn-ghost" onclick="closeModal('currency-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -936,6 +962,8 @@ function init() {
   updateLastBackupLabel();
   applyDarkMode();
   updateGoalSub();
+  updateCurrencySub();
+  initNotifications();
   setInterval(updateTimerDisplay, 1000);
   // daily note autosave
   document.getElementById('daily-note').addEventListener('input', function() {
@@ -1381,7 +1409,14 @@ function renderStats() {
 // ═══════════════════════════════════════════════
 function loadSettings() {
   const s = state.settings || {};
-  if (s.reminders === false) document.getElementById('toggle-reminders').classList.remove('on');
+  // Restore dark mode
+  applyDarkMode();
+  // Sync reminder toggle with actual browser permission
+  updateReminderToggle();
+  updateReminderSub();
+  // Currency
+  updateCurrencySub();
+  updateGoalSub();
 }
 
 function toggleSetting(btn, key) {
@@ -1756,7 +1791,13 @@ function changeMonth(dir) {
   renderMoney();
 }
 
-function fmt(n) { return '$' + Math.abs(n).toFixed(2); }
+function getCurrencySymbol() {
+  const code = (state.settings && state.settings.currency) || 'USD';
+  const map = { USD:'$', EUR:'€', GBP:'£', INR:'₹', JPY:'¥', CAD:'CA$', AUD:'A$', CHF:'CHF', CNY:'¥', KRW:'₩', BRL:'R$', MXN:'MX$', SGD:'S$', AED:'د.إ', SAR:'﷼', THB:'฿', IDR:'Rp', PHP:'₱', MYR:'RM', HKD:'HK$', TRY:'₺', ZAR:'R', NGN:'₦', PKR:'₨', BDT:'৳', VND:'₫', EGP:'£', COP:'$', CLP:'$', DKK:'kr', NOK:'kr', SEK:'kr', PLN:'zł', CZK:'Kč', HUF:'Ft', RON:'lei', RUB:'₽', UAH:'₴', ILS:'₪', NZD:'NZ$', TWD:'NT$', QAR:'﷼', KWD:'KD', BHD:'BD', OMR:'﷼', JOD:'JD', LKR:'₨', NPR:'₨', MMK:'K', KHR:'៛', LAK:'₭', MNT:'₮', GEL:'₾', AMD:'֏', AZN:'₼', KZT:'₸', UZS:'сум', TZS:'Tsh', KES:'Ksh', GHS:'GH₵', XOF:'CFA', MAD:'MAD', DZD:'دج', TND:'DT' };
+  return map[code] || code;
+}
+
+function fmt(n) { return getCurrencySymbol() + Math.abs(n).toFixed(2); }
 
 function renderMoney() {
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1768,6 +1809,7 @@ function renderMoney() {
   const balance = income - expense;
 
   document.getElementById('balance-val').textContent = balance.toFixed(2);
+  document.getElementById('balance-currency-sym').textContent = getCurrencySymbol();
   document.getElementById('total-income-val').textContent  = fmt(income);
   document.getElementById('total-expense-val').textContent = fmt(expense);
 
@@ -2200,6 +2242,242 @@ function updateGoalSub() {
   if (!el) return;
   const text = state.settings && state.settings.goalText;
   el.textContent = text || 'Tap to set your daily goal';
+}
+
+// ═══════════════════════════════════════════════
+//  CURRENCY
+// ═══════════════════════════════════════════════
+const CURRENCIES = [
+  { code:'USD', name:'US Dollar',           sym:'$'    },
+  { code:'EUR', name:'Euro',                sym:'€'    },
+  { code:'GBP', name:'British Pound',       sym:'£'    },
+  { code:'INR', name:'Indian Rupee',        sym:'₹'    },
+  { code:'JPY', name:'Japanese Yen',        sym:'¥'    },
+  { code:'CAD', name:'Canadian Dollar',     sym:'CA$'  },
+  { code:'AUD', name:'Australian Dollar',   sym:'A$'   },
+  { code:'CHF', name:'Swiss Franc',         sym:'CHF'  },
+  { code:'CNY', name:'Chinese Yuan',        sym:'¥'    },
+  { code:'KRW', name:'South Korean Won',    sym:'₩'    },
+  { code:'BRL', name:'Brazilian Real',      sym:'R$'   },
+  { code:'MXN', name:'Mexican Peso',        sym:'MX$'  },
+  { code:'SGD', name:'Singapore Dollar',    sym:'S$'   },
+  { code:'AED', name:'UAE Dirham',          sym:'د.إ'  },
+  { code:'SAR', name:'Saudi Riyal',         sym:'﷼'    },
+  { code:'THB', name:'Thai Baht',           sym:'฿'    },
+  { code:'IDR', name:'Indonesian Rupiah',   sym:'Rp'   },
+  { code:'PHP', name:'Philippine Peso',     sym:'₱'    },
+  { code:'MYR', name:'Malaysian Ringgit',   sym:'RM'   },
+  { code:'HKD', name:'Hong Kong Dollar',    sym:'HK$'  },
+  { code:'TRY', name:'Turkish Lira',        sym:'₺'    },
+  { code:'ZAR', name:'South African Rand',  sym:'R'    },
+  { code:'NGN', name:'Nigerian Naira',      sym:'₦'    },
+  { code:'PKR', name:'Pakistani Rupee',     sym:'₨'    },
+  { code:'BDT', name:'Bangladeshi Taka',    sym:'৳'    },
+  { code:'VND', name:'Vietnamese Dong',     sym:'₫'    },
+  { code:'EGP', name:'Egyptian Pound',      sym:'£'    },
+  { code:'NZD', name:'New Zealand Dollar',  sym:'NZ$'  },
+  { code:'TWD', name:'Taiwan Dollar',       sym:'NT$'  },
+  { code:'QAR', name:'Qatari Riyal',        sym:'﷼'    },
+  { code:'KWD', name:'Kuwaiti Dinar',       sym:'KD'   },
+  { code:'LKR', name:'Sri Lankan Rupee',    sym:'₨'    },
+  { code:'RUB', name:'Russian Ruble',       sym:'₽'    },
+  { code:'DKK', name:'Danish Krone',        sym:'kr'   },
+  { code:'NOK', name:'Norwegian Krone',     sym:'kr'   },
+  { code:'SEK', name:'Swedish Krona',       sym:'kr'   },
+  { code:'PLN', name:'Polish Zloty',        sym:'zł'   },
+  { code:'ILS', name:'Israeli Shekel',      sym:'₪'    },
+  { code:'KES', name:'Kenyan Shilling',     sym:'Ksh'  },
+  { code:'GHS', name:'Ghanaian Cedi',       sym:'GH₵'  },
+  { code:'MAD', name:'Moroccan Dirham',     sym:'MAD'  },
+];
+
+function openCurrencyModal() {
+  const current = (state.settings && state.settings.currency) || 'USD';
+  const list = document.getElementById('currency-list');
+  list.innerHTML = CURRENCIES.map(c => `
+    <div onclick="selectCurrency('${c.code}')" style="
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px; background:var(--surface2); border:2px solid ${c.code===current?'var(--accent)':'var(--border)'};
+      border-radius:14px; cursor:pointer; transition:all .15s;
+    ">
+      <div>
+        <div style="font-size:14px;font-weight:600">${c.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${c.code}</div>
+      </div>
+      <div style="font-size:20px;font-weight:700;color:${c.code===current?'var(--accent)':'var(--muted)'}">${c.sym}</div>
+    </div>
+  `).join('');
+  openModal('currency-modal');
+}
+
+function selectCurrency(code) {
+  state.settings = state.settings || {};
+  state.settings.currency = code;
+  saveState();
+  updateCurrencySub();
+  closeModal('currency-modal');
+  // Re-render money if on that page
+  if (currentPage === 'money') renderMoney();
+  const c = CURRENCIES.find(c => c.code === code);
+  toast(`💱 Currency set to ${c ? c.name : code}`);
+}
+
+function updateCurrencySub() {
+  const el = document.getElementById('currency-sub');
+  if (!el) return;
+  const code = (state.settings && state.settings.currency) || 'USD';
+  const c = CURRENCIES.find(c => c.code === code);
+  el.textContent = c ? `${c.name} (${c.sym})` : code;
+}
+
+// ═══════════════════════════════════════════════
+//  NOTIFICATIONS & REMINDERS
+// ═══════════════════════════════════════════════
+function updateReminderToggle() {
+  const btn = document.getElementById('toggle-reminders');
+  if (!btn) return;
+  const granted = ('Notification' in window) && Notification.permission === 'granted';
+  const enabled = !!(state.settings && state.settings.reminders) && granted;
+  btn.classList.toggle('on', enabled);
+}
+
+function updateReminderSub() {
+  const el = document.getElementById('reminder-sub');
+  if (!el) return;
+  if (!('Notification' in window)) {
+    el.textContent = '❌ Not supported in this browser';
+    return;
+  }
+  const perm = Notification.permission;
+  const enabled = !!(state.settings && state.settings.reminders);
+  if (perm === 'denied') {
+    el.textContent = '⚠️ Blocked — enable in iPhone Settings → Safari';
+  } else if (perm === 'granted' && enabled) {
+    const count = getTasksForToday().filter(t => t.time && !t.done).length;
+    el.textContent = `✅ Active · ${count} reminder${count !== 1 ? 's' : ''} set for today`;
+  } else {
+    el.textContent = 'Tap to enable task notifications';
+  }
+}
+
+function handleReminderToggle() {
+  if (!('Notification' in window)) {
+    toast('❌ Notifications not supported in this browser');
+    return;
+  }
+
+  const btn = document.getElementById('toggle-reminders');
+  const isCurrentlyOn = btn.classList.contains('on');
+
+  if (isCurrentlyOn) {
+    // Disable
+    state.settings = state.settings || {};
+    state.settings.reminders = false;
+    saveState();
+    updateReminderToggle();
+    updateReminderSub();
+    toast('🔕 Reminders disabled');
+    return;
+  }
+
+  // Enable — check permission first
+  if (Notification.permission === 'denied') {
+    toast('⚠️ Notifications blocked. Go to: iPhone Settings → Safari → Notifications → Allow');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    // Already granted — just enable
+    state.settings = state.settings || {};
+    state.settings.reminders = true;
+    saveState();
+    updateReminderToggle();
+    updateReminderSub();
+    scheduleAllNotifications();
+    toast('🔔 Reminders enabled!');
+  } else {
+    // Ask permission
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        state.settings = state.settings || {};
+        state.settings.reminders = true;
+        saveState();
+        updateReminderToggle();
+        updateReminderSub();
+        scheduleAllNotifications();
+        // Send welcome test notification
+        setTimeout(() => {
+          new Notification('DayFlow 🔔', {
+            body: 'Reminders are on! You\'ll be notified at each task\'s scheduled time.',
+            tag: 'dayflow-welcome'
+          });
+        }, 800);
+        toast('🔔 Reminders enabled! Check your task times.');
+      } else {
+        toast('⚠️ Permission denied. Enable in iPhone Settings → Safari → Notifications.');
+      }
+    });
+  }
+}
+
+function scheduleAllNotifications() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (!(state.settings && state.settings.reminders)) return;
+
+  const tasks = getTasksForToday().filter(t => t.time && !t.done);
+  let scheduled = 0;
+
+  tasks.forEach(task => {
+    const [h, m] = task.time.split(':').map(Number);
+    const now = new Date();
+    const fireAt = new Date();
+    fireAt.setHours(h, m, 0, 0);
+    const diff = fireAt - now;
+
+    // Only schedule if in the future (within next 24h)
+    if (diff > 0 && diff < 86400000) {
+      scheduled++;
+      setTimeout(() => {
+        // Only fire if task still not done
+        const t = state.tasks.find(t => t.id === task.id);
+        if (t && !t.done) {
+          new Notification(`⏰ ${task.name}`, {
+            body: `${formatTime(task.time)} · ${task.duration} min · ${task.cat}`,
+            tag: `task-reminder-${task.id}`,
+            requireInteraction: false,
+          });
+        }
+      }, diff);
+    }
+
+    // Also schedule a 5-min early warning
+    const earlyDiff = diff - (5 * 60 * 1000);
+    if (earlyDiff > 0 && earlyDiff < 86400000) {
+      setTimeout(() => {
+        const t = state.tasks.find(t => t.id === task.id);
+        if (t && !t.done) {
+          new Notification(`⏳ Coming up in 5 min: ${task.name}`, {
+            body: `Starts at ${formatTime(task.time)}`,
+            tag: `task-early-${task.id}`,
+          });
+        }
+      }, earlyDiff);
+    }
+  });
+
+  if (scheduled > 0) {
+    console.log(`DayFlow: ${scheduled} task notifications scheduled`);
+  }
+}
+
+// Re-schedule notifications on app init if reminders are on
+function initNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted' && state.settings && state.settings.reminders) {
+    scheduleAllNotifications();
+  }
+  updateReminderToggle();
+  updateReminderSub();
 }
 
 // ═══════════════════════════════════════════════
