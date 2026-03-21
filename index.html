@@ -103,7 +103,7 @@
   .timer-badge { background: var(--surface2); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); white-space: nowrap; }
 
   /* Quick Add */
-  .fab { position: fixed; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 56px; border-radius: 16px 0 0 16px; background: var(--accent); border: none; color: white; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -3px 0 18px rgba(124,106,247,.45); transition: transform .2s, width .2s; z-index: 50; }
+  .fab { position: fixed; right: 0; bottom: calc(70px + env(safe-area-inset-bottom) + 14px); width: 44px; height: 56px; border-radius: 16px 0 0 16px; background: var(--accent); border: none; color: white; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -3px 0 18px rgba(124,106,247,.45); transition: width .2s; z-index: 50; }
   .fab:active { width: 38px; }
 
   /* ── Modal ── */
@@ -531,9 +531,12 @@
 
       <!-- Balance hero -->
       <div class="balance-hero">
-        <div class="balance-label">Total Balance</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+          <div class="balance-label">Total Balance</div>
+          <button onclick="openBudgetModal()" style="background:rgba(124,106,247,.18);border:1px solid rgba(124,106,247,.35);color:var(--accent);border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" id="budget-set-btn">💰 Set Budget</button>
+        </div>
         <div class="balance-amount"><span class="currency" id="balance-currency-sym">$</span><span id="balance-val">0.00</span></div>
-        <div id="pocket-chip-wrap"></div>
+        <div id="pocket-chip-wrap" style="margin-top:4px"></div>
         <div class="balance-row">
           <div class="balance-pill">
             <div class="balance-pill-label">Income</div>
@@ -547,7 +550,7 @@
       </div>
 
       <!-- Budget progress -->
-      <div class="budget-bar-card" id="budget-bar-wrap">
+      <div class="budget-bar-card" id="budget-bar-wrap" onclick="openBudgetModal()" style="cursor:pointer">
         <div class="budget-bar-top">
           <div class="budget-bar-title">Monthly Budget</div>
           <div class="budget-bar-pct" id="budget-pct-label">0%</div>
@@ -844,27 +847,49 @@
 <div class="modal-backdrop" id="budget-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h2>Set Monthly Budget</h2>
+    <h2 id="budget-modal-title">Set Monthly Budget 💰</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px" id="budget-modal-sub">Set how much you plan to spend this month.</p>
     <div class="form-group">
       <label>Budget Amount (<span id="budget-amount-currency-sym">$</span>)</label>
       <input type="number" id="budget-amount-input" placeholder="e.g. 2000" min="1" inputmode="decimal">
     </div>
-    <div class="form-group">
-      <label>Savings Goal Name</label>
-      <input type="text" id="goal-name-input" placeholder="e.g. New iPhone" maxlength="30">
-    </div>
-    <div class="form-group">
-      <label>Savings Goal Target (<span id="savings-target-currency-sym">$</span>)</label>
-      <input type="number" id="goal-target-input" placeholder="e.g. 1200" min="1" inputmode="decimal">
-    </div>
-    <div class="form-group">
-      <label>Already Saved (<span id="savings-saved-currency-sym">$</span>)</label>
-      <input type="number" id="goal-saved-input" placeholder="0" min="0" inputmode="decimal" value="0">
-    </div>
     <div class="btn-row">
       <button class="btn-ghost" onclick="closeModal('budget-modal')">Cancel</button>
-      <button class="btn-primary" onclick="saveBudget()">Save</button>
+      <button class="btn-primary" onclick="saveBudgetOnly()">Save Budget</button>
     </div>
+  </div>
+</div>
+
+<!-- Savings Goal Modal (separate) -->
+<div class="modal-backdrop" id="savings-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Savings Goals 🎯</h2>
+    <div class="form-group">
+      <label>Goal</label>
+      <select id="goal-selector" onchange="onGoalSelect(this)">
+        <option value="__new__">+ New Goal</option>
+      </select>
+    </div>
+    <div id="goal-fields">
+      <div class="form-group">
+        <label>Goal Name</label>
+        <input type="text" id="goal-name-input" placeholder="e.g. New iPhone" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label>Target Amount (<span id="savings-target-currency-sym">$</span>)</label>
+        <input type="number" id="goal-target-input" placeholder="e.g. 1200" min="1" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label>Already Saved (<span id="savings-saved-currency-sym">$</span>)</label>
+        <input type="number" id="goal-saved-input" placeholder="0" min="0" inputmode="decimal" value="0">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ghost" onclick="closeModal('savings-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveSavingsGoal()">Save Goal</button>
+    </div>
+    <div style="margin-top:10px" id="delete-goal-wrap"></div>
   </div>
 </div>
 
@@ -1926,13 +1951,16 @@ function renderMoney() {
   // Balance color
   document.querySelector('.balance-amount').style.color = balance >= 0 ? 'var(--text)' : 'var(--danger)';
 
-  // "In my pocket" chip
+  // "In my pocket" chip + budget button label
   const budget = state.budget || 0;
   const pocket = budget ? Math.max(0, budget - expense) : null;
   const chipWrap = document.getElementById('pocket-chip-wrap');
   chipWrap.innerHTML = pocket !== null
     ? `<div class="pocket-chip"><span>💳 In my pocket: ${fmt(pocket)}</span></div>`
-    : `<div class="pocket-chip" onclick="openModal('budget-modal')" style="cursor:pointer"><span>+ Set monthly budget</span></div>`;
+    : '';
+  // Update budget button label
+  const budgetBtn = document.getElementById('budget-set-btn');
+  if (budgetBtn) budgetBtn.textContent = budget > 0 ? `💰 ${fmt(budget)}` : '💰 Set Budget';
 
   // Budget bar
   if (budget > 0) {
@@ -2065,17 +2093,27 @@ function renderTrendBars() {
 function renderSavingsCard() {
   const card = document.getElementById('savings-card-wrap');
   const goals = state.savingsGoals || [];
+  const header = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <h3 style="margin:0">Savings Goals 🎯</h3>
+    <button onclick="openSavingsModal(null)" style="background:rgba(106,247,200,.12);border:1px solid rgba(106,247,200,.25);color:var(--accent3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ New</button>
+  </div>`;
   if (!goals.length) {
-    card.innerHTML = `<h3>Savings Goals 🎯</h3><div style="font-size:13px;color:var(--muted);margin-top:4px">Tap the budget button to add a savings goal</div>
-      <button onclick="openModal('budget-modal')" style="margin-top:10px;background:rgba(106,247,200,.15);color:var(--accent3);border:1px solid rgba(106,247,200,.3);border-radius:10px;padding:8px 14px;font-size:12px;cursor:pointer">+ Set Goal</button>`;
+    card.innerHTML = header + `<div style="font-size:13px;color:var(--muted)">No savings goals yet. Tap + New to add one.</div>`;
   } else {
-    card.innerHTML = `<h3>Savings Goals 🎯</h3>` + goals.map(g => {
+    card.innerHTML = header + goals.map((g, idx) => {
       const pct = Math.min(100, Math.round((g.saved||0)/g.target*100));
-      return `<div class="savings-goal-item">
-        <div class="savings-goal-top"><span class="savings-goal-name">${g.name}</span><span class="savings-goal-val">${fmt(g.saved||0)} / ${fmt(g.target)}</span></div>
+      return `<div class="savings-goal-item" onclick="openSavingsModal(${idx})" style="cursor:pointer">
+        <div class="savings-goal-top">
+          <span class="savings-goal-name">${g.name}</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="savings-goal-val">${fmt(g.saved||0)} / ${fmt(g.target)}</span>
+            <span style="font-size:11px;color:var(--muted)">✏️</span>
+          </span>
+        </div>
         <div class="savings-bar-wrap"><div class="savings-bar" style="width:${pct}%"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${pct}% saved</div>
       </div>`;
-    }).join('') + `<button onclick="openModal('budget-modal')" style="margin-top:8px;background:rgba(106,247,200,.1);color:var(--accent3);border:1px solid rgba(106,247,200,.2);border-radius:10px;padding:6px 12px;font-size:11px;cursor:pointer">+ Update Goal</button>`;
+    }).join('');
   }
 }
 
@@ -2225,22 +2263,103 @@ function deleteTxn(id) {
   }
 }
 
-function saveBudget() {
+function openBudgetModal() {
+  const budget = state.budget || 0;
+  document.getElementById('budget-amount-input').value = budget > 0 ? budget : '';
+  openModal('budget-modal');
+}
+
+function saveBudgetOnly() {
   const amt = parseFloat(document.getElementById('budget-amount-input').value);
-  if (amt > 0) state.budget = amt;
-  const gName = document.getElementById('goal-name-input').value.trim();
-  const gTarget = parseFloat(document.getElementById('goal-target-input').value);
-  const gSaved = parseFloat(document.getElementById('goal-saved-input').value) || 0;
-  if (gName && gTarget > 0) {
-    if (!state.savingsGoals) state.savingsGoals = [];
-    const existing = state.savingsGoals.find(g=>g.name===gName);
-    if (existing) { existing.target = gTarget; existing.saved = gSaved; }
-    else state.savingsGoals.push({ name: gName, target: gTarget, saved: gSaved });
-    toast('🎯 Goal saved!');
-  }
+  if (!amt || amt <= 0) { toast('⚠️ Enter a valid budget amount'); return; }
+  state.budget = amt;
   saveState();
   closeModal('budget-modal');
   renderMoney();
+  toast('💰 Budget updated!');
+}
+
+// Keep old saveBudget as alias so nothing breaks
+function saveBudget() { saveBudgetOnly(); }
+
+function openSavingsModal(idx) {
+  const goals = state.savingsGoals || [];
+  const selector = document.getElementById('goal-selector');
+
+  // Rebuild dropdown options
+  selector.innerHTML = '<option value="__new__">+ New Goal</option>' +
+    goals.map((g, i) => `<option value="${i}">${g.name}</option>`).join('');
+
+  if (idx !== null && idx !== undefined && goals[idx]) {
+    selector.value = String(idx);
+    fillGoalFields(goals[idx]);
+    document.getElementById('delete-goal-wrap').innerHTML =
+      `<button class="btn-danger" style="width:100%" onclick="deleteGoal(${idx})">🗑 Delete Goal</button>`;
+  } else {
+    selector.value = '__new__';
+    clearGoalFields();
+    document.getElementById('delete-goal-wrap').innerHTML = '';
+  }
+  openModal('savings-modal');
+}
+
+function onGoalSelect(sel) {
+  const goals = state.savingsGoals || [];
+  const val = sel.value;
+  if (val === '__new__') {
+    clearGoalFields();
+    document.getElementById('delete-goal-wrap').innerHTML = '';
+  } else {
+    const idx = parseInt(val);
+    fillGoalFields(goals[idx]);
+    document.getElementById('delete-goal-wrap').innerHTML =
+      `<button class="btn-danger" style="width:100%" onclick="deleteGoal(${idx})">🗑 Delete Goal</button>`;
+  }
+}
+
+function fillGoalFields(g) {
+  document.getElementById('goal-name-input').value = g.name || '';
+  document.getElementById('goal-target-input').value = g.target || '';
+  document.getElementById('goal-saved-input').value = g.saved || 0;
+}
+
+function clearGoalFields() {
+  document.getElementById('goal-name-input').value = '';
+  document.getElementById('goal-target-input').value = '';
+  document.getElementById('goal-saved-input').value = 0;
+}
+
+function saveSavingsGoal() {
+  const name = document.getElementById('goal-name-input').value.trim();
+  const target = parseFloat(document.getElementById('goal-target-input').value);
+  const saved = parseFloat(document.getElementById('goal-saved-input').value) || 0;
+  if (!name) { toast('⚠️ Enter a goal name'); return; }
+  if (!target || target <= 0) { toast('⚠️ Enter a valid target amount'); return; }
+
+  if (!state.savingsGoals) state.savingsGoals = [];
+  const selector = document.getElementById('goal-selector');
+  const val = selector.value;
+
+  if (val === '__new__') {
+    state.savingsGoals.push({ name, target, saved });
+    toast('🎯 Goal added!');
+  } else {
+    const idx = parseInt(val);
+    state.savingsGoals[idx] = { name, target, saved };
+    toast('🎯 Goal updated!');
+  }
+  saveState();
+  closeModal('savings-modal');
+  renderMoney();
+}
+
+function deleteGoal(idx) {
+  if (!confirm('Delete this savings goal?')) return;
+  state.savingsGoals.splice(idx, 1);
+  saveState();
+  closeModal('savings-modal');
+  renderMoney();
+  toast('🗑 Goal deleted');
 }
 
 function handleFab() {
