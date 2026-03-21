@@ -103,8 +103,8 @@
   .timer-badge { background: var(--surface2); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); white-space: nowrap; }
 
   /* Quick Add */
-  .fab { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(124,106,247,.5); transition: transform .2s; z-index: 50; }
-  .fab:active { transform: scale(.9); }
+  .fab { position: fixed; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 56px; border-radius: 16px 0 0 16px; background: var(--accent); border: none; color: white; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: -3px 0 18px rgba(124,106,247,.45); transition: transform .2s, width .2s; z-index: 50; }
+  .fab:active { width: 38px; }
 
   /* ── Modal ── */
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: none; align-items: flex-end; backdrop-filter: blur(4px); touch-action: none; overscroll-behavior: none; }
@@ -138,8 +138,6 @@
   .habit-streak { display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--accent2); }
   .habit-name { font-size: 14px; font-weight: 600; margin-top: 10px; }
   .habit-freq { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .habit-bar-wrap { margin-top: 10px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .habit-bar { height: 100%; border-radius: 3px; transition: width .4s ease; }
   .habit-week { display: flex; gap: 4px; margin-top: 8px; }
   .habit-dot { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); }
   .habit-dot.done { border-color: transparent; }
@@ -151,12 +149,11 @@
   .stat-card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
   .stat-val { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; }
   .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .heatmap { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; margin-top: 6px; }
-  .heatmap-cell { aspect-ratio: 1; border-radius: 3px; }
-  .chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 80px; margin-top: 6px; }
-  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s; }
-  .chart-day { font-size: 9px; color: var(--muted); }
+  .mood-chart { display: flex; align-items: flex-end; gap: 5px; height: 70px; margin-top: 8px; }
+  .mood-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .mood-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s; min-height: 4px; }
+  .mood-day { font-size: 9px; color: var(--muted); }
+  .mood-emoji-label { font-size: 10px; line-height: 1; }
 
   /* ── Settings ── */
   .settings-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -303,6 +300,13 @@
   .trend-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height .4s ease; }
   .trend-day { font-size: 9px; color: var(--muted); }
 
+  /* Repeat grid */
+  .repeat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+  .repeat-btn { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 12px; font-weight: 500; padding: 8px 4px; cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif; }
+  .repeat-btn.selected { background: rgba(124,106,247,.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .day-btn { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; font-weight: 500; padding: 6px 10px; cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif; }
+  .day-btn.selected { background: rgba(124,106,247,.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
   /* Add expense modal extras */
   .type-toggle { display: flex; background: var(--surface2); border-radius: 12px; padding: 3px; margin-bottom: 14px; }
   .type-btn { flex: 1; padding: 8px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; border: none; background: none; color: var(--muted); }
@@ -387,7 +391,10 @@
       <div id="tasks-container"></div>
 
       <!-- Daily note -->
-      <div class="section-label"><div class="dot" style="background:var(--accent3)"></div>Daily Note</div>
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:20px">
+        <div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:var(--accent3)"></div>Daily Note</div>
+        <button onclick="openNotesHistory()" style="background:rgba(106,247,200,.12);border:1px solid rgba(106,247,200,.25);color:var(--accent3);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Past Notes</button>
+      </div>
       <div class="note-card">
         <textarea id="daily-note" rows="3" placeholder="Jot down thoughts for today…"></textarea>
       </div>
@@ -688,12 +695,46 @@
     </div>
     <div class="form-group">
       <label>Repeat</label>
-      <select id="task-repeat-input">
-        <option value="daily">Every Day</option>
-        <option value="weekdays">Weekdays</option>
-        <option value="weekends">Weekends</option>
-        <option value="once">Just Today</option>
-      </select>
+      <div class="repeat-grid" id="repeat-grid">
+        <button type="button" class="repeat-btn selected" data-val="daily" onclick="selectRepeat(this)">Every Day</button>
+        <button type="button" class="repeat-btn" data-val="weekdays" onclick="selectRepeat(this)">Weekdays</button>
+        <button type="button" class="repeat-btn" data-val="weekends" onclick="selectRepeat(this)">Weekends</button>
+        <button type="button" class="repeat-btn" data-val="tomorrow" onclick="selectRepeat(this)">Tomorrow</button>
+        <button type="button" class="repeat-btn" data-val="once" onclick="selectRepeat(this)">Just Today</button>
+        <button type="button" class="repeat-btn" data-val="specific_days" onclick="selectRepeat(this)">Specific Days</button>
+        <button type="button" class="repeat-btn" data-val="monthly" onclick="selectRepeat(this)">Monthly</button>
+        <button type="button" class="repeat-btn" data-val="yearly" onclick="selectRepeat(this)">Yearly</button>
+        <button type="button" class="repeat-btn" data-val="custom" onclick="selectRepeat(this)">Custom Date</button>
+      </div>
+      <input type="hidden" id="task-repeat-input" value="daily">
+      <!-- Specific days picker -->
+      <div id="specific-days-picker" style="display:none;margin-top:10px;display:none">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Select days:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="day-btn" data-day="1" onclick="toggleDay(this)">Mon</button>
+          <button type="button" class="day-btn" data-day="2" onclick="toggleDay(this)">Tue</button>
+          <button type="button" class="day-btn" data-day="3" onclick="toggleDay(this)">Wed</button>
+          <button type="button" class="day-btn" data-day="4" onclick="toggleDay(this)">Thu</button>
+          <button type="button" class="day-btn" data-day="5" onclick="toggleDay(this)">Fri</button>
+          <button type="button" class="day-btn" data-day="6" onclick="toggleDay(this)">Sat</button>
+          <button type="button" class="day-btn" data-day="0" onclick="toggleDay(this)">Sun</button>
+        </div>
+      </div>
+      <!-- Monthly date picker -->
+      <div id="monthly-picker" style="display:none;margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Day of month:</div>
+        <input type="number" id="monthly-date-input" min="1" max="31" value="1" placeholder="e.g. 15" style="width:100px">
+      </div>
+      <!-- Yearly date picker -->
+      <div id="yearly-picker" style="display:none;margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Date each year:</div>
+        <input type="date" id="yearly-date-input">
+      </div>
+      <!-- Custom date picker -->
+      <div id="custom-date-picker" style="display:none;margin-top:10px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Specific date:</div>
+        <input type="date" id="custom-date-input">
+      </div>
     </div>
     <div class="btn-row">
       <button class="btn-ghost" onclick="closeModal('add-modal')">Cancel</button>
@@ -882,6 +923,18 @@
   </div>
 </div>
 
+<!-- Past Notes Modal -->
+<div class="modal-backdrop" id="notes-history-modal">
+  <div class="modal" style="max-height:85dvh;display:flex;flex-direction:column">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0">
+      <h2 style="font-size:18px">Past Notes 📓</h2>
+      <button onclick="closeModal('notes-history-modal')" style="background:var(--surface2);border:none;color:var(--muted);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="notes-history-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;padding-right:4px"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -995,8 +1048,14 @@ function resetDailyTasksIfNeeded() {
   const t = today();
   if (state.lastActiveDate !== t) {
     state.tasks.forEach(task => {
-      if (task.repeat !== 'once') task.done = false;
-      else if (task.createdAt !== t) task._expired = true;
+      const oneTimeTypes = ['once', 'tomorrow', 'custom'];
+      if (oneTimeTypes.includes(task.repeat)) {
+        // Expire if the target date has passed
+        const targetDate = task.repeat === 'once' ? task.createdAt : (task.repeatMeta && task.repeatMeta.date);
+        if (targetDate && targetDate < t) task._expired = true;
+      } else {
+        task.done = false;
+      }
     });
     state.tasks = state.tasks.filter(t => !t._expired);
     state.lastActiveDate = t;
@@ -1036,11 +1095,28 @@ const PERIOD_COLORS = { morning: '#f7d46a', afternoon: '#f7916a', evening: '#7c6
 function getTasksForToday() {
   const d = new Date();
   const dow = d.getDay(); // 0=Sun
+  const todayStr = today();
   return state.tasks.filter(t => {
-    if (t.repeat === 'daily') return true;
+    if (t.repeat === 'daily')    return true;
     if (t.repeat === 'weekdays') return dow >= 1 && dow <= 5;
     if (t.repeat === 'weekends') return dow === 0 || dow === 6;
-    if (t.repeat === 'once') return t.createdAt === today();
+    if (t.repeat === 'once')     return t.createdAt === todayStr;
+    if (t.repeat === 'tomorrow') return t.repeatMeta && t.repeatMeta.date === todayStr;
+    if (t.repeat === 'specific_days') {
+      const days = (t.repeatMeta && t.repeatMeta.days) || [];
+      return days.includes(dow);
+    }
+    if (t.repeat === 'monthly') {
+      const dayOfMonth = t.repeatMeta && t.repeatMeta.dayOfMonth;
+      return d.getDate() === dayOfMonth;
+    }
+    if (t.repeat === 'yearly') {
+      const meta = t.repeatMeta || {};
+      return d.getMonth() === meta.month && d.getDate() === meta.day;
+    }
+    if (t.repeat === 'custom') {
+      return t.repeatMeta && t.repeatMeta.date === todayStr;
+    }
     return true;
   });
 }
@@ -1194,11 +1270,21 @@ function renderMood() {
 }
 
 function setMood(el) {
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  state.mood[today()] = el.dataset.mood;
-  saveState();
-  toast(`Mood logged: ${el.dataset.mood}`);
+  const current = state.mood[today()];
+  const tapped = el.dataset.mood;
+  if (current === tapped) {
+    // Deselect — tap same mood again to undo
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    delete state.mood[today()];
+    saveState();
+    toast('Mood cleared');
+  } else {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    state.mood[today()] = tapped;
+    saveState();
+    toast(`Mood logged: ${tapped}`);
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1262,8 +1348,9 @@ function buildHabitCard(habit) {
   const t = new Date().toISOString().slice(0,10);
   const doneToday = habit.history.includes(t);
 
-  // Week dots (last 7 days)
+  // Week dots — Mon to Sun (last 7 days in Mon-first order)
   const weekDots = [];
+  const todayDow = new Date().getDay(); // 0=Sun
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86400000).toISOString().slice(0,10);
     weekDots.push(`<div class="habit-dot ${habit.history.includes(d) ? 'done' : ''}" style="${habit.history.includes(d) ? 'background:'+habit.color : ''}"></div>`);
@@ -1284,7 +1371,6 @@ function buildHabitCard(habit) {
     </div>
     <div class="habit-name">${habit.name}</div>
     <div class="habit-freq">${habit.freq} · ${weekProgress}/7 this week</div>
-    <div class="habit-bar-wrap"><div class="habit-bar" style="width:${Math.min(100,weekProgress/7*100)}%;background:${habit.color}"></div></div>
     <div class="habit-week">${weekDots.join('')}</div>
   `;
   if (doneToday) div.style.borderColor = habit.color;
@@ -1359,26 +1445,34 @@ function renderStats() {
   const avgMood = Object.values(state.mood).map(m => ['😔','😐','🙂','😄','🤩'].indexOf(m)+1).filter(v=>v>0);
   const moodAvg = avgMood.length ? (avgMood.reduce((a,b)=>a+b,0)/avgMood.length).toFixed(1) : '–';
 
-  // Heatmap (last 14 days)
-  const heatCells = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0,10);
-    const count = (state.completedDays[d] || []).length;
-    const intensity = count === 0 ? 0 : Math.min(1, count / Math.max(tasks.length, 1));
-    const alpha = intensity * 0.9 + 0.1;
-    heatCells.push(`<div class="heatmap-cell" style="background:${count>0?`rgba(124,106,247,${alpha})`:'var(--border)'}"></div>`);
-  }
+  // 7-day mood trend — Mon to Sun order
+  const moodEmojis = ['😔','😐','🙂','😄','🤩'];
+  const moodColors = ['#f76a6a','#f7916a','#f7d46a','#6af7c8','#7c6af7'];
+  const dayNames = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const moodBars = [];
 
-  // Bar chart (last 7 days completions)
-  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const bars = [];
+  // Build last 7 days starting from most-recent Monday
+  const todayDate = new Date();
+  const todayDow = todayDate.getDay(); // 0=Sun
+  // Days offset so week starts Mon: Sun becomes 6, Mon becomes 0
+  const daysFromMon = (todayDow + 6) % 7; // how many days since last Monday
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86400000);
     const ds = d.toISOString().slice(0,10);
-    const count = (state.completedDays[ds] || []).length;
-    const total = state.tasks.filter(t=>t.repeat!=='once').length || 1;
-    const h = Math.max(8, Math.round(count/total*80));
-    bars.push(`<div class="chart-bar-wrap"><div class="chart-bar" style="height:${h}px;background:var(--accent);opacity:${i===0?1:.6}"></div><div class="chart-day">${dayNames[d.getDay()]}</div></div>`);
+    // Mon-first label: compute day index
+    const dow = d.getDay();
+    const monFirstIdx = (dow + 6) % 7;
+    const label = dayNames[monFirstIdx];
+    const moodVal = state.mood[ds] ? moodEmojis.indexOf(state.mood[ds]) + 1 : 0;
+    const isToday = (i === 0);
+    const h = moodVal > 0 ? Math.round(moodVal / 5 * 56) : 4;
+    const color = moodVal > 0 ? moodColors[moodVal - 1] : 'var(--border)';
+    const emoji = moodVal > 0 ? moodEmojis[moodVal - 1] : '';
+    moodBars.push(`<div class="mood-bar-wrap">
+      <div class="mood-emoji-label">${emoji}</div>
+      <div class="mood-bar" style="height:${h}px;background:${color};opacity:${isToday?1:0.7}"></div>
+      <div class="mood-day" style="${isToday?'color:var(--accent);font-weight:700':''}'">${label}</div>
+    </div>`);
   }
 
   grid.innerHTML = `
@@ -1413,12 +1507,8 @@ function renderStats() {
       <div class="stat-sub">Being tracked</div>
     </div>
     <div class="stat-card wide">
-      <h3>14-Day Activity</h3>
-      <div class="heatmap">${heatCells.join('')}</div>
-    </div>
-    <div class="stat-card wide">
-      <h3>Weekly Completions</h3>
-      <div class="chart-bars">${bars.join('')}</div>
+      <h3>7-Day Mood Trend</h3>
+      <div class="mood-chart">${moodBars.join('')}</div>
     </div>
   `;
 }
@@ -1460,7 +1550,7 @@ function openAddModal() {
   document.getElementById('task-dur-input').value = '15';
   document.getElementById('task-period-input').value = 'morning';
   document.getElementById('task-cat-input').value = 'health';
-  document.getElementById('task-repeat-input').value = 'daily';
+  setRepeatUI('daily', null);
   document.getElementById('delete-btn-wrap').innerHTML = '';
   selectedEmoji = '☀️';
   document.querySelectorAll('#emoji-picker .emoji-opt').forEach(e => e.classList.toggle('selected', e.textContent === selectedEmoji));
@@ -1477,7 +1567,7 @@ function openEditModal(id) {
   document.getElementById('task-dur-input').value = task.duration;
   document.getElementById('task-period-input').value = task.period;
   document.getElementById('task-cat-input').value = task.cat;
-  document.getElementById('task-repeat-input').value = task.repeat;
+  setRepeatUI(task.repeat, task.repeatMeta);
   selectedEmoji = task.emoji;
   document.querySelectorAll('#emoji-picker .emoji-opt').forEach(e => e.classList.toggle('selected', e.textContent === selectedEmoji));
   document.getElementById('delete-btn-wrap').innerHTML = `<button class="btn-danger" style="width:100%" onclick="deleteTask(${id})">🗑 Delete Task</button>`;
@@ -1488,6 +1578,10 @@ function saveTask() {
   const name = document.getElementById('task-name-input').value.trim();
   if (!name) { toast('⚠️ Please enter a task name'); return; }
 
+  const repeat = document.getElementById('task-repeat-input').value;
+  const repeatMeta = getRepeatMeta(repeat);
+  if (repeatMeta === null) return; // validation failed inside getRepeatMeta
+
   const taskData = {
     emoji: selectedEmoji,
     name,
@@ -1495,7 +1589,8 @@ function saveTask() {
     duration: parseInt(document.getElementById('task-dur-input').value) || 15,
     period: document.getElementById('task-period-input').value,
     cat: document.getElementById('task-cat-input').value,
-    repeat: document.getElementById('task-repeat-input').value,
+    repeat,
+    repeatMeta,
     done: false,
     createdAt: today(),
   };
@@ -1918,7 +2013,7 @@ function renderDonut(txns) {
 }
 
 function renderTrendBars() {
-  const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const monFirstNames = ['Mo','Tu','We','Th','Fr','Sa','Su'];
   const bars = document.getElementById('trend-bars');
   const scroll = document.getElementById('trend-bars-scroll');
   bars.innerHTML = '';
@@ -1932,8 +2027,9 @@ function renderTrendBars() {
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const amt = (state.transactions||[]).filter(t => t.date === ds && t.type === 'expense').reduce((s,t) => s + t.amount, 0);
-    const dayOfWeek = new Date(year, month, d).getDay();
-    dailyAmts.push({ date: d, dateStr: ds, dayLabel: dayNames[dayOfWeek], amt });
+    const rawDow = new Date(year, month, d).getDay();
+    const monFirstDow = (rawDow + 6) % 7;
+    dailyAmts.push({ date: d, dateStr: ds, dayLabel: monFirstNames[monFirstDow], amt });
   }
 
   const max = Math.max(...dailyAmts.map(d => d.amt), 1);
@@ -2231,10 +2327,12 @@ function updateLastBackupLabel() {
 // ═══════════════════════════════════════════════
 //  DARK MODE
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  DARK MODE
+// ═══════════════════════════════════════════════
 function toggleDarkMode() {
   const isDark = document.documentElement.style.getPropertyValue('--bg') !== '#f5f5f7';
   if (isDark) {
-    // Switch to light
     document.documentElement.style.setProperty('--bg', '#f5f5f7');
     document.documentElement.style.setProperty('--surface', '#ffffff');
     document.documentElement.style.setProperty('--surface2', '#efefef');
@@ -2245,7 +2343,6 @@ function toggleDarkMode() {
     document.getElementById('dark-mode-sub').textContent = 'Currently: Light';
     state.settings.darkMode = false;
   } else {
-    // Switch to dark
     document.documentElement.style.setProperty('--bg', '#0e0f14');
     document.documentElement.style.setProperty('--surface', '#16181f');
     document.documentElement.style.setProperty('--surface2', '#1e2029');
@@ -2424,6 +2521,130 @@ function showDayDetail(dateStr) {
   }
 
   openModal('day-detail-modal');
+}
+
+// ═══════════════════════════════════════════════
+//  REPEAT OPTIONS
+// ═══════════════════════════════════════════════
+function selectRepeat(btn) {
+  document.querySelectorAll('.repeat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const val = btn.dataset.val;
+  document.getElementById('task-repeat-input').value = val;
+  // Show/hide sub-pickers
+  document.getElementById('specific-days-picker').style.display = val === 'specific_days' ? 'block' : 'none';
+  document.getElementById('monthly-picker').style.display       = val === 'monthly'        ? 'block' : 'none';
+  document.getElementById('yearly-picker').style.display        = val === 'yearly'         ? 'block' : 'none';
+  document.getElementById('custom-date-picker').style.display   = val === 'custom'         ? 'block' : 'none';
+}
+
+function toggleDay(btn) {
+  btn.classList.toggle('selected');
+}
+
+function setRepeatUI(repeat, meta) {
+  // Reset all buttons
+  document.querySelectorAll('.repeat-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.val === repeat);
+  });
+  document.getElementById('task-repeat-input').value = repeat || 'daily';
+  // Hide all sub-pickers first
+  ['specific-days-picker','monthly-picker','yearly-picker','custom-date-picker'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  // Clear day selections
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+
+  if (repeat === 'specific_days' && meta && meta.days) {
+    document.getElementById('specific-days-picker').style.display = 'block';
+    document.querySelectorAll('.day-btn').forEach(b => {
+      if (meta.days.includes(parseInt(b.dataset.day))) b.classList.add('selected');
+    });
+  } else if (repeat === 'monthly') {
+    document.getElementById('monthly-picker').style.display = 'block';
+    if (meta && meta.dayOfMonth) document.getElementById('monthly-date-input').value = meta.dayOfMonth;
+  } else if (repeat === 'yearly') {
+    document.getElementById('yearly-picker').style.display = 'block';
+    if (meta && meta.month !== undefined) {
+      const d = new Date(2000, meta.month, meta.day);
+      document.getElementById('yearly-date-input').value = d.toISOString().slice(0,10);
+    }
+  } else if (repeat === 'custom' || repeat === 'tomorrow') {
+    if (repeat === 'custom') document.getElementById('custom-date-picker').style.display = 'block';
+    if (meta && meta.date) document.getElementById('custom-date-input').value = meta.date;
+  }
+}
+
+function getRepeatMeta(repeat) {
+  if (repeat === 'daily' || repeat === 'weekdays' || repeat === 'weekends' || repeat === 'once') {
+    return {};
+  }
+  if (repeat === 'tomorrow') {
+    const d = new Date(Date.now() + 86400000);
+    return { date: d.toISOString().slice(0,10) };
+  }
+  if (repeat === 'specific_days') {
+    const days = [...document.querySelectorAll('.day-btn.selected')].map(b => parseInt(b.dataset.day));
+    if (!days.length) { toast('⚠️ Select at least one day'); return null; }
+    return { days };
+  }
+  if (repeat === 'monthly') {
+    const day = parseInt(document.getElementById('monthly-date-input').value);
+    if (!day || day < 1 || day > 31) { toast('⚠️ Enter a valid day (1–31)'); return null; }
+    return { dayOfMonth: day };
+  }
+  if (repeat === 'yearly') {
+    const val = document.getElementById('yearly-date-input').value;
+    if (!val) { toast('⚠️ Pick a date for yearly repeat'); return null; }
+    const d = new Date(val);
+    return { month: d.getMonth(), day: d.getDate() };
+  }
+  if (repeat === 'custom') {
+    const val = document.getElementById('custom-date-input').value;
+    if (!val) { toast('⚠️ Pick a custom date'); return null; }
+    if (val < today()) { toast('⚠️ Pick a future date'); return null; }
+    return { date: val };
+  }
+  return {};
+}
+
+// ═══════════════════════════════════════════════
+//  PAST NOTES VIEWER
+// ═══════════════════════════════════════════════
+function openNotesHistory() {
+  const list = document.getElementById('notes-history-list');
+  const notes = state.notes || {};
+  const entries = Object.entries(notes)
+    .filter(([, v]) => v && v.trim())
+    .sort((a, b) => b[0].localeCompare(a[0])); // newest first
+
+  if (!entries.length) {
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:10px">📓</div>
+      <div style="font-size:14px">No past notes yet.<br>Start writing today!</div>
+    </div>`;
+  } else {
+    const todayStr = today();
+    list.innerHTML = entries.map(([date, note]) => {
+      const d = new Date(date + 'T00:00:00');
+      const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const label = date === todayStr
+        ? 'Today'
+        : `${dayNames[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      const isToday = date === todayStr;
+      return `
+        <div style="background:var(--surface2);border:1px solid ${isToday ? 'var(--accent3)' : 'var(--border)'};border-radius:14px;padding:14px 16px">
+          <div style="font-size:11px;font-weight:700;color:${isToday ? 'var(--accent3)' : 'var(--muted)'};text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px">${label}</div>
+          <div style="font-size:14px;line-height:1.6;color:var(--text);white-space:pre-wrap">${escapeHtml(note)}</div>
+        </div>`;
+    }).join('');
+  }
+  openModal('notes-history-modal');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ═══════════════════════════════════════════════
