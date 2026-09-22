@@ -14,17 +14,25 @@ export interface Env {
 
 const MAX_BYTES = 2_000_000;
 
-const cors = (extra: Record<string, string> = {}) => ({
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Expected-Updated-At, X-Force-Write',
-  ...extra,
-});
+const cors = (req?: Request, extra: Record<string, string> = {}) => {
+  const origin = (req && req.headers.get('Origin')) || '*';
+  const reqHeaders =
+    (req && req.headers.get('Access-Control-Request-Headers')) ||
+    'Content-Type, Authorization, X-Expected-Updated-At, X-Force-Write, X-Requested-With';
+  return {
+    'Access-Control-Allow-Origin': !origin || origin === 'null' ? '*' : origin,
+    'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
+    'Access-Control-Allow-Headers': reqHeaders,
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+    ...extra,
+  };
+};
 
-function json(data: unknown, status = 200): Response {
+function json(data: unknown, status = 200, req?: Request): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...cors() },
+    headers: { 'Content-Type': 'application/json', ...cors(req) },
   });
 }
 
@@ -48,7 +56,7 @@ function d1Changes(result: { meta?: { changes?: number; rows_written?: number } 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: cors() });
+      return new Response(null, { status: 204, headers: cors(request) });
     }
 
     try {
@@ -57,7 +65,7 @@ export default {
       const m = /^\/api\/v1\/stores(?:\/([^/]+))?$/.exec(path);
 
       if (!m) {
-        return json({ error: 'not_found' }, 404);
+        return json({ error: 'not_found' }, 404, request);
       }
 
       const storeId = m[1];
@@ -71,11 +79,11 @@ export default {
         )
           .bind(id, empty, ts)
           .run();
-        return json({ id });
+        return json({ id }, 200, request);
       }
 
       if (!storeId) {
-        return json({ error: 'bad_request' }, 400);
+        return json({ error: 'bad_request' }, 400, request);
       }
 
       if (request.method === 'GET') {
@@ -86,28 +94,28 @@ export default {
           .first<{ payload: string; updated_at: number }>();
 
         if (!row) {
-          return json({ error: 'not_found' }, 404);
+          return json({ error: 'not_found' }, 404, request);
         }
-        return json({ payload: parsePayload(row.payload), updated_at: row.updated_at });
+        return json({ payload: parsePayload(row.payload), updated_at: row.updated_at }, 200, request);
       }
 
       if (request.method === 'PUT') {
         const ct = request.headers.get('Content-Type') || '';
         if (!ct.includes('application/json')) {
-          return json({ error: 'expected_json' }, 415);
+          return json({ error: 'expected_json' }, 415, request);
         }
         const raw = await request.text();
         if (!raw.length) {
-          return json({ error: 'empty_body' }, 400);
+          return json({ error: 'empty_body' }, 400, request);
         }
         const enc = new TextEncoder();
         if (enc.encode(raw).length > MAX_BYTES) {
-          return json({ error: 'payload_too_large' }, 413);
+          return json({ error: 'payload_too_large' }, 413, request);
         }
         try {
           JSON.parse(raw);
         } catch {
-          return json({ error: 'invalid_json' }, 400);
+          return json({ error: 'invalid_json' }, 400, request);
         }
 
         const force = (request.headers.get('X-Force-Write') || '') === '1';
@@ -128,7 +136,7 @@ export default {
         if (!force && expectedRaw !== null && expectedRaw !== '') {
           const expected = Number(expectedRaw);
           if (!Number.isFinite(expected)) {
-            return json({ error: 'bad_request' }, 400);
+            return json({ error: 'bad_request' }, 400, request);
           }
           const cas = await env.DAYFLOW_DB.prepare(
             'UPDATE stores SET payload = ?, updated_at = ? WHERE id = ? AND updated_at = ?'
@@ -136,7 +144,7 @@ export default {
             .bind(raw, ts, storeId, expected)
             .run();
           if (d1Changes(cas) > 0) {
-            return json({ ok: true, updated_at: ts });
+            return json({ ok: true, updated_at: ts }, 200, request);
           }
           const existing = await env.DAYFLOW_DB.prepare(
             'SELECT payload, updated_at FROM stores WHERE id = ?'
@@ -145,22 +153,23 @@ export default {
             .first<{ payload: string; updated_at: number }>();
           if (!existing) {
             await upsert();
-            return json({ ok: true, updated_at: ts });
+            return json({ ok: true, updated_at: ts }, 200, request);
           }
           return json(
             { error: 'conflict', updated_at: existing.updated_at, payload: parsePayload(existing.payload) },
-            409
+            409,
+            request
           );
         }
 
         await upsert();
-        return json({ ok: true, updated_at: ts });
+        return json({ ok: true, updated_at: ts }, 200, request);
       }
 
-      return json({ error: 'method_not_allowed' }, 405);
+      return json({ error: 'method_not_allowed' }, 405, request);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      return json({ error: 'server_error', message: msg }, 500);
+      return json({ error: 'server_error', message: msg }, 500, request);
     }
   },
 };
