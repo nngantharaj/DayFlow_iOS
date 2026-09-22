@@ -1,0 +1,14 @@
+{
+  "name": "dayflow-d1-worker",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "d1:migrate": "wrangler d1 migrations apply dayflow"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3",
+    "wrangler": "^3.99.0",
+    "@cloudflare/workers-types": "^4.20241127.0"
+  }
+}

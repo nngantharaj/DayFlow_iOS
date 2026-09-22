@@ -1,0 +1,11 @@
+name = "dayflow-d1-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-12"
+
+[[d1_databases]]
+binding = "DAYFLOW_DB"
+database_name = "dayflow"
+database_id = "db6112d4-7959-4340-adee-2ddf77c66cf1"
+
+# Apply schema: wrangler d1 migrations apply dayflow
+# Create DB:     wrangler d1 create dayflow

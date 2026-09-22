@@ -619,6 +619,16 @@
           </div>
           <span style="color:var(--accent);font-size:18px">›</span>
         </div>
+        <div class="settings-item" onclick="openCfSyncModal()">
+          <div class="settings-item-left">
+            <div class="settings-icon" style="background:rgba(124,106,247,.15)">☁️</div>
+            <div>
+              <div class="settings-label">Cloudflare D1</div>
+              <div class="settings-sub" id="cf-sync-sub">Offline only (this device)</div>
+            </div>
+          </div>
+          <span style="color:var(--accent);font-size:18px">›</span>
+        </div>
         <!-- BACKUP SECTION -->
         <div style="padding:4px 0 6px">
           <div class="section-label" style="padding:10px 0 8px"><div class="dot" style="background:var(--accent3)"></div>Data Backup</div>
@@ -671,7 +681,7 @@
           <span style="color:var(--accent);font-size:18px">›</span>
         </div>
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">
-          DayFlow v1.0 · Your data is stored locally on this device 🔒
+          DayFlow v1.0 · D1 optional · this device keeps an offline cache
         </div>
       </div>
     </div>
@@ -1105,6 +1115,29 @@
   </div>
 </div>
 
+<!-- Cloudflare D1 sync -->
+<div class="modal-backdrop" id="cf-sync-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Cloudflare D1 ☁️</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Same Worker URL and Store ID on every device. D1 is the shared copy; this phone/laptop keeps a local cache for offline use.</p>
+    <div class="form-group">
+      <label>Worker API URL</label>
+      <input type="url" id="cf-sync-api-input" placeholder="https://dayflow-d1-api.<sub>.workers.dev" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Store ID</label>
+      <input type="text" id="cf-sync-store-input" placeholder="Paste store UUID" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="btn-row" style="flex-wrap:wrap">
+      <button type="button" class="btn-ghost" onclick="createCfRemoteStore()">New store…</button>
+      <button type="button" class="btn-ghost" onclick="copyCfStoreId()">Copy ID</button>
+      <button type="button" class="btn-ghost" onclick="closeModal('cf-sync-modal')">Cancel</button>
+      <button type="button" class="btn-primary" onclick="saveCfSyncSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Day Detail Modal -->
 <div class="modal-backdrop" id="day-detail-modal">
   <div class="modal">
@@ -1261,7 +1294,383 @@
 //  STATE
 // ═══════════════════════════════════════════════
 const STORAGE_KEY = 'dayflow_v2';
-let state = loadState();
+const CF_API_URL_KEY = 'dayflow_cf_api_base';
+const CF_STORE_ID_KEY = 'dayflow_cf_store_id';
+const CF_POLL_MS = 40000;
+const CF_RETRY_MS = 8000;
+let cloudSyncTimer = null;
+let cloudPollTimer = null;
+let cloudRetryTimer = null;
+let cloudPushChain = Promise.resolve();
+let cloudLifecycleBound = false;
+let cloudDirty = false;
+let cloudRev = 0;
+let cloudBaseSnapshot = null;
+let cloudLastOkAt = 0;
+let cloudLastError = '';
+let appStarted = false;
+let state;
+
+function cloneState(s) {
+  return JSON.parse(JSON.stringify(s));
+}
+
+function getCloudSyncConfig() {
+  const base = (localStorage.getItem(CF_API_URL_KEY) || '').trim().replace(/\/+$/, '');
+  const storeId = (localStorage.getItem(CF_STORE_ID_KEY) || '').trim();
+  return { enabled: !!(base && storeId), base, storeId };
+}
+
+function isSeededPayload(s) {
+  return s && typeof s === 'object' && Array.isArray(s.tasks);
+}
+
+function maxNumericId(arr) {
+  return (arr || []).reduce((m, item) => {
+    const n = Number(item && item.id);
+    return Number.isFinite(n) ? Math.max(m, n) : m;
+  }, 0);
+}
+
+function bumpEntityCounters(s) {
+  s.nextTaskId = Math.max(s.nextTaskId || 1, maxNumericId(s.tasks) + 1);
+  s.nextHabitId = Math.max(s.nextHabitId || 1, maxNumericId(s.habits) + 1);
+  s.nextBalanceId = Math.max(s.nextBalanceId || 1, maxNumericId(s.balances) + 1);
+  s.nextBillId = Math.max(s.nextBillId || 1, maxNumericId(s.recurringBills) + 1);
+  s.nextTxnId = Math.max(s.nextTxnId || 1, maxNumericId(s.transactions) + 1);
+  s.nextGoalId = Math.max(s.nextGoalId || 1, maxNumericId(s.savingsGoals) + 1);
+}
+
+function prepareState(s) {
+  migrateBudgetState(s);
+  migrateFeaturesState(s);
+  bumpEntityCounters(s);
+  return s;
+}
+
+function allocId(counterKey) {
+  const n = Math.max(Number(state[counterKey]) || 1, Date.now()) + Math.floor(Math.random() * 500);
+  state[counterKey] = n + 1;
+  return n;
+}
+
+function persistLocalCache(s) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (_) {}
+}
+
+function markCloudSynced(s, updatedAt) {
+  clearTimeout(cloudRetryTimer);
+  cloudRev = typeof updatedAt === 'number' ? updatedAt : cloudRev;
+  cloudBaseSnapshot = cloneState(s);
+  cloudDirty = false;
+  cloudLastOkAt = Date.now();
+  cloudLastError = '';
+  updateCfSyncSub();
+}
+
+function scheduleCloudRetry() {
+  clearTimeout(cloudRetryTimer);
+  cloudRetryTimer = setTimeout(() => {
+    if (cloudDirty) void enqueueCloudPush(false);
+  }, CF_RETRY_MS);
+}
+
+function noteCloudPushFailure(msg) {
+  cloudLastError = msg;
+  updateCfSyncSub();
+  scheduleCloudRetry();
+}
+
+function idKey(item) {
+  if (!item || typeof item !== 'object') return null;
+  if (item.id != null) return String(item.id);
+  return null;
+}
+
+function mapById(arr) {
+  const m = new Map();
+  (arr || []).forEach(item => {
+    const k = idKey(item);
+    if (k != null) m.set(k, item);
+  });
+  return m;
+}
+
+function mergeArrayById(baseArr, localArr, remoteArr) {
+  const baseMap = mapById(baseArr);
+  const localMap = mapById(localArr);
+  const remoteMap = mapById(remoteArr);
+  const order = [];
+  const seen = new Set();
+  (localArr || []).forEach(item => {
+    const k = idKey(item);
+    if (k == null || seen.has(k)) return;
+    seen.add(k);
+    order.push(k);
+  });
+  (remoteArr || []).forEach(item => {
+    const k = idKey(item);
+    if (k == null || seen.has(k)) return;
+    seen.add(k);
+    order.push(k);
+  });
+  const out = [];
+  order.forEach(k => {
+    const b = baseMap.get(k);
+    const l = localMap.get(k);
+    const r = remoteMap.get(k);
+    if (l && r) {
+      if (stableEqual(l, r) || (b && stableEqual(r, b))) out.push(l);
+      else if (b && stableEqual(l, b)) out.push(r);
+      else out.push(threeWayMerge(b || {}, l, r));
+    } else if (l && !r) {
+      if (!baseMap.has(k)) out.push(l);
+    } else if (r && !l) {
+      if (!baseMap.has(k)) out.push(r);
+    }
+  });
+  const localUnkeyed = (localArr || []).filter(item => idKey(item) == null);
+  const remoteUnkeyed = (remoteArr || []).filter(item => idKey(item) == null);
+  if (stableEqual(localUnkeyed, remoteUnkeyed) || stableEqual(localUnkeyed, (baseArr || []).filter(item => idKey(item) == null))) {
+    return out.concat(remoteUnkeyed);
+  }
+  return out.concat(localUnkeyed);
+}
+
+function isPlainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function stableEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function threeWayMerge(base, local, remote) {
+  if (Array.isArray(local) || Array.isArray(remote) || Array.isArray(base)) {
+    const la = Array.isArray(local) ? local : [];
+    const ra = Array.isArray(remote) ? remote : [];
+    const ba = Array.isArray(base) ? base : [];
+    const keyed = la.some(idKey) || ra.some(idKey);
+    if (keyed) return mergeArrayById(ba, la, ra);
+    const primitives = [...la, ...ra, ...ba].every(x => x == null || typeof x !== 'object');
+    if (primitives) {
+      if (stableEqual(la, ra) || stableEqual(la, ba)) return ra;
+      if (stableEqual(ra, ba)) return la;
+      return [...new Set([...ra, ...la])];
+    }
+    if (stableEqual(la, ra) || stableEqual(la, ba)) return ra;
+    return la;
+  }
+  if (!isPlainObject(local) && !isPlainObject(remote)) {
+    if (stableEqual(local, remote) || stableEqual(local, base)) return remote;
+    if (stableEqual(remote, base)) return local;
+    return local;
+  }
+  const b = isPlainObject(base) ? base : {};
+  const l = isPlainObject(local) ? local : {};
+  const r = isPlainObject(remote) ? remote : {};
+  const keys = new Set([...Object.keys(b), ...Object.keys(l), ...Object.keys(r)]);
+  const out = {};
+  keys.forEach(k => {
+    const bv = b[k];
+    const lv = l[k];
+    const rv = r[k];
+    if (stableEqual(lv, rv) || stableEqual(lv, bv)) out[k] = rv;
+    else if (stableEqual(rv, bv)) out[k] = lv;
+    else out[k] = threeWayMerge(bv, lv, rv);
+  });
+  return out;
+}
+
+async function fetchRemoteBundle(cfg) {
+  const r = await fetch(`${cfg.base}/api/v1/stores/${encodeURIComponent(cfg.storeId)}`, {
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+  });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) return { ok: false, status: r.status, body: j };
+  if (!j || typeof j.payload !== 'object' || j.payload === null) {
+    return { ok: false, status: r.status, body: j };
+  }
+  return { ok: true, payload: j.payload, updated_at: j.updated_at };
+}
+
+async function loadStateHydrated() {
+  const cfg = getCloudSyncConfig();
+  const local = loadStateFromLocalStorage();
+  if (!cfg.enabled) return local;
+  try {
+    const remote = await fetchRemoteBundle(cfg);
+    if (!remote.ok) {
+      cloudLastError = remote.status === 404 ? 'Store not found' : 'Could not load D1';
+      return local;
+    }
+    cloudRev = remote.updated_at || 0;
+    if (!isSeededPayload(remote.payload)) {
+      cloudDirty = true;
+      cloudBaseSnapshot = isSeededPayload(local) ? cloneState(local) : cloneState(getDefaultState());
+      persistLocalCache(local);
+      return local;
+    }
+    const payload = prepareState(remote.payload);
+    persistLocalCache(payload);
+    markCloudSynced(payload, remote.updated_at);
+    return payload;
+  } catch (_) {
+    cloudLastError = 'Offline — using cache';
+    return local;
+  }
+}
+
+function loadStateFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return prepareState(JSON.parse(raw));
+    }
+  } catch (_) {}
+  return getDefaultState();
+}
+
+function queueCloudPush() {
+  const cfg = getCloudSyncConfig();
+  if (!cfg.enabled) return;
+  cloudDirty = true;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => void enqueueCloudPush(false), 450);
+}
+
+function enqueueCloudPush(force) {
+  cloudPushChain = cloudPushChain.then(() => pushRemoteState(force)).catch(() => {});
+  return cloudPushChain;
+}
+
+async function pushRemoteState(force) {
+  const cfg = getCloudSyncConfig();
+  if (!cfg.enabled || !state) return;
+  if (!cloudDirty && !force) return;
+  const snapshot = cloneState(state);
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Expected-Updated-At': String(cloudRev || 0),
+    };
+    if (force) headers['X-Force-Write'] = '1';
+    const r = await fetch(`${cfg.base}/api/v1/stores/${encodeURIComponent(cfg.storeId)}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(snapshot),
+      keepalive: true,
+    });
+    const j = await r.json().catch(() => null);
+    if (r.status === 409 && j && typeof j.payload === 'object') {
+      const putAgain = async (body, expected, forceWrite) => {
+        const hdrs = {
+          'Content-Type': 'application/json',
+          'X-Expected-Updated-At': String(expected || 0),
+        };
+        if (forceWrite) hdrs['X-Force-Write'] = '1';
+        const retry = await fetch(`${cfg.base}/api/v1/stores/${encodeURIComponent(cfg.storeId)}`, {
+          method: 'PUT',
+          headers: hdrs,
+          body: JSON.stringify(body),
+          keepalive: true,
+        });
+        return { retry, jr: await retry.json().catch(() => null) };
+      };
+      if (!isSeededPayload(j.payload)) {
+        const { retry, jr } = await putAgain(snapshot, j.updated_at, true);
+        if (retry.ok) markCloudSynced(snapshot, jr && jr.updated_at);
+        else noteCloudPushFailure('Sync failed');
+        return;
+      }
+      const merged = prepareState(threeWayMerge(cloudBaseSnapshot || {}, snapshot, j.payload));
+      state = merged;
+      persistLocalCache(state);
+      cloudRev = j.updated_at || cloudRev;
+      cloudBaseSnapshot = cloneState(j.payload);
+      cloudDirty = true;
+      if (appStarted) init();
+      const { retry, jr } = await putAgain(state, cloudRev, false);
+      if (retry.ok) {
+        markCloudSynced(state, jr && jr.updated_at);
+        toast('☁️ Merged with another device');
+        return;
+      }
+      noteCloudPushFailure('Sync conflict');
+      return;
+    }
+    if (!r.ok) {
+      noteCloudPushFailure('Sync failed');
+      return;
+    }
+    if (!cloudDirty || stableEqual(snapshot, state)) {
+      markCloudSynced(state, j && j.updated_at);
+    } else {
+      cloudRev = (j && j.updated_at) || cloudRev;
+      cloudBaseSnapshot = snapshot;
+      cloudLastOkAt = Date.now();
+      cloudLastError = '';
+      updateCfSyncSub();
+    }
+  } catch (_) {
+    noteCloudPushFailure('Offline — will retry');
+  }
+}
+
+async function pullRemoteIfIdle() {
+  const cfg = getCloudSyncConfig();
+  if (!cfg.enabled || cloudDirty || !appStarted) return;
+  try {
+    const remote = await fetchRemoteBundle(cfg);
+    if (!remote.ok || !isSeededPayload(remote.payload)) return;
+    if (remote.updated_at === cloudRev) return;
+    const payload = prepareState(remote.payload);
+    state = payload;
+    persistLocalCache(payload);
+    markCloudSynced(payload, remote.updated_at);
+    init();
+  } catch (_) {}
+}
+
+function bindCloudSyncLifecycle() {
+  if (cloudLifecycleBound) return;
+  cloudLifecycleBound = true;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      clearTimeout(cloudSyncTimer);
+      void enqueueCloudPush(false);
+    } else if (cloudDirty) {
+      void enqueueCloudPush(false);
+    } else {
+      void pullRemoteIfIdle();
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    clearTimeout(cloudSyncTimer);
+    void enqueueCloudPush(false);
+  });
+  window.addEventListener('online', () => {
+    if (cloudDirty) void enqueueCloudPush(false);
+    else void pullRemoteIfIdle();
+  });
+  clearInterval(cloudPollTimer);
+  cloudPollTimer = setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    if (cloudDirty) void enqueueCloudPush(false);
+    else void pullRemoteIfIdle();
+  }, CF_POLL_MS);
+}
+
+async function hydrateAndStart() {
+  state = await loadStateHydrated();
+  appStarted = true;
+  init();
+  bindCloudSyncLifecycle();
+  const cfg = getCloudSyncConfig();
+  if (cfg.enabled && cloudDirty) void enqueueCloudPush(false);
+  else if (cfg.enabled && cloudLastError) toast('☁️ ' + cloudLastError);
+}
 
 let editingTaskId = null;
 let selectedEmoji = '☀️';
@@ -1277,19 +1686,6 @@ const WEATHER_CACHE_MS = 15 * 60 * 1000;
 // ═══════════════════════════════════════════════
 //  STORAGE
 // ═══════════════════════════════════════════════
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const s = JSON.parse(raw);
-      migrateBudgetState(s);
-      migrateFeaturesState(s);
-      return s;
-    }
-  } catch(e) {}
-  return getDefaultState();
-}
-
 function migrateBudgetState(s) {
   if (!s.budgetsByMonth || typeof s.budgetsByMonth !== 'object') s.budgetsByMonth = {};
   if (typeof s.budget === 'number' && s.budget > 0) {
@@ -1332,6 +1728,14 @@ function migrateFeaturesState(s) {
       if (typeof task.manualOrder !== 'number') task.manualOrder = Number.MAX_SAFE_INTEGER;
     });
   }
+  if (!s.nextTxnId) s.nextTxnId = 1;
+  if (!s.nextGoalId) s.nextGoalId = 1;
+  if (!Array.isArray(s.savingsGoals)) s.savingsGoals = [];
+  s.savingsGoals.forEach(g => {
+    if (g && typeof g === 'object' && g.id == null) {
+      g.id = s.nextGoalId++;
+    }
+  });
 }
 
 function getDefaultState() {
@@ -1367,6 +1771,8 @@ function getDefaultState() {
     },
     nextTaskId: 10,
     nextHabitId: 4,
+    nextTxnId: 1,
+    nextGoalId: 1,
     transactions: [],
     budgetsByMonth: {},
     savingsGoals: [],
@@ -1380,6 +1786,7 @@ function getDefaultState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  queueCloudPush();
 }
 
 function formatDateKeyLocal(d) {
@@ -2082,6 +2489,89 @@ function buildCompletionHeatmapHtml() {
 // ═══════════════════════════════════════════════
 function loadSettings() {
   updateCurrencySub();
+  updateCfSyncSub();
+}
+
+function updateCfSyncSub() {
+  const el = document.getElementById('cf-sync-sub');
+  if (!el) return;
+  if (!getCloudSyncConfig().enabled) {
+    el.textContent = 'Offline only (this device)';
+    return;
+  }
+  if (cloudLastError) {
+    el.textContent = cloudLastError;
+    return;
+  }
+  if (cloudLastOkAt) {
+    const t = new Date(cloudLastOkAt);
+    const time = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    el.textContent = cloudDirty ? `Sync pending · last ok ${time}` : `All devices · last ok ${time}`;
+    return;
+  }
+  el.textContent = 'Sync on (D1)';
+}
+
+function openCfSyncModal() {
+  const api = document.getElementById('cf-sync-api-input');
+  const sid = document.getElementById('cf-sync-store-input');
+  if (api) api.value = localStorage.getItem(CF_API_URL_KEY) || '';
+  if (sid) sid.value = localStorage.getItem(CF_STORE_ID_KEY) || '';
+  openModal('cf-sync-modal');
+  if (api) setTimeout(() => api.focus(), 40);
+}
+
+function saveCfSyncSettings() {
+  const apiEl = document.getElementById('cf-sync-api-input');
+  const sidEl = document.getElementById('cf-sync-store-input');
+  const api = apiEl ? apiEl.value.trim().replace(/\/+$/, '') : '';
+  const sid = sidEl ? sidEl.value.trim() : '';
+  if ((api || sid) && (!api || !sid)) {
+    toast('⚠️ Set both Worker URL and Store ID, or leave both blank for offline-only');
+    return;
+  }
+  if (api) {
+    localStorage.setItem(CF_API_URL_KEY, api);
+    localStorage.setItem(CF_STORE_ID_KEY, sid);
+  } else {
+    localStorage.removeItem(CF_API_URL_KEY);
+    localStorage.removeItem(CF_STORE_ID_KEY);
+  }
+  closeModal('cf-sync-modal');
+  toast(api ? '☁️ D1 sync saved — reloading…' : '📁 Offline-only — reloading…');
+  location.reload();
+}
+
+async function createCfRemoteStore() {
+  const apiEl = document.getElementById('cf-sync-api-input');
+  const sidEl = document.getElementById('cf-sync-store-input');
+  const base = apiEl ? apiEl.value.trim().replace(/\/+$/, '') : '';
+  if (!base) { toast('⚠️ Enter Worker URL first'); return; }
+  try {
+    const r = await fetch(`${base}/api/v1/stores`, { method: 'POST' });
+    const j = await r.json();
+    if (!r.ok || !j.id) { toast('❌ Could not create store'); return; }
+    if (sidEl) sidEl.value = j.id;
+    toast('✅ Created store — Copy ID onto other devices, then Save');
+  } catch (_) {
+    toast('❌ Network error creating store');
+  }
+}
+
+function copyCfStoreId() {
+  const sidEl = document.getElementById('cf-sync-store-input');
+  const sid = sidEl ? sidEl.value.trim() : '';
+  if (!sid) { toast('⚠️ No store ID to copy'); return; }
+  const done = () => toast('📋 Store ID copied — paste it on your other devices');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(sid).then(done).catch(() => {
+      sidEl.select();
+      toast('⚠️ Copy failed — select and copy the ID');
+    });
+  } else {
+    sidEl.select();
+    toast('⚠️ Select and copy the Store ID');
+  }
 }
 
 function toggleSetting(btn, key) {
@@ -2092,7 +2582,10 @@ function toggleSetting(btn, key) {
 }
 
 function clearData() {
-  if (confirm('Reset ALL data? This cannot be undone.')) {
+  const extra = getCloudSyncConfig().enabled
+    ? ' This also overwrites the shared D1 copy on the next sync.'
+    : '';
+  if (confirm('Reset ALL data? This cannot be undone.' + extra)) {
     localStorage.removeItem(STORAGE_KEY);
     state = getDefaultState();
     saveState();
@@ -2171,7 +2664,7 @@ function saveTask() {
     state.tasks[idx] = taskData;
     toast('✏️ Task updated!');
   } else {
-    taskData.id = state.nextTaskId++;
+    taskData.id = allocId('nextTaskId');
     taskData.createdAt = today();
     const maxOrder = state.tasks.reduce((max, t) => Math.max(max, typeof t.manualOrder === 'number' ? t.manualOrder : -1), -1);
     taskData.manualOrder = maxOrder + 1;
@@ -2257,7 +2750,7 @@ function saveHabit() {
     }
   } else {
     state.habits.push({
-      id: state.nextHabitId++,
+      id: allocId('nextHabitId'),
       emoji: selectedHabitEmoji,
       name,
       freq: document.getElementById('habit-freq-input').value,
@@ -2903,7 +3396,7 @@ function saveTxn() {
   if (!desc) { toast('⚠️ Enter a description'); return; }
 
   const txnData = {
-    id: editingTxnId || Date.now(),
+    id: editingTxnId || allocId('nextTxnId'),
     type: txnType,
     amount,
     desc,
@@ -3027,11 +3520,12 @@ function saveSavingsGoal() {
   const val = selector.value;
 
   if (val === '__new__') {
-    state.savingsGoals.push({ name, target, saved });
+    state.savingsGoals.push({ id: allocId('nextGoalId'), name, target, saved });
     toast('🎯 Goal added!');
   } else {
     const idx = parseInt(val);
-    state.savingsGoals[idx] = { name, target, saved };
+    const prev = state.savingsGoals[idx] || {};
+    state.savingsGoals[idx] = { id: prev.id || allocId('nextGoalId'), name, target, saved };
     toast('🎯 Goal updated!');
   }
   saveState();
@@ -3107,10 +3601,11 @@ function importData(event) {
         toast('❌ Invalid backup file');
         return;
       }
-      if (!confirm('This will replace ALL current data with the backup. Continue?')) return;
-      state = backup.data;
-      migrateBudgetState(state);
-      migrateFeaturesState(state);
+      const extra = getCloudSyncConfig().enabled
+        ? ' The restored copy will be pushed to D1.'
+        : '';
+      if (!confirm('This will replace ALL current data with the backup. Continue?' + extra)) return;
+      state = prepareState(backup.data);
       saveState();
       init();
       showPage('today', document.querySelector('.nav-btn'));
@@ -3567,7 +4062,7 @@ function saveIou() {
   if (!amt || amt <= 0) { toast('⚠️ Enter amount'); return; }
   if (!state.balances) state.balances = [];
   const row = {
-    id: editingIouId || Date.now(),
+    id: editingIouId || allocId('nextBalanceId'),
     person,
     dir: document.getElementById('iou-dir-input').value,
     amount: amt,
@@ -3842,7 +4337,7 @@ function saveRecurringBill() {
     }
   } else {
     state.recurringBills.push({
-      id: state.nextBillId++,
+      id: allocId('nextBillId'),
       label,
       amount: amt,
       cat: document.getElementById('bill-cat-input').value,
@@ -3884,7 +4379,7 @@ function postRecurringBillsInternal(showToastOnPosted, isAutoMode) {
     const key = `${y}-${m}-${bill.id}`;
     if (state.recurringPosted[key]) return;
     state.transactions.push({
-      id: Date.now() + Math.random(),
+      id: allocId('nextTxnId'),
       type: 'expense',
       amount: bill.amount,
       desc: bill.label + ' (recurring)',
@@ -4037,7 +4532,7 @@ function postRecurringBillsInternal(showToastOnPosted, isAutoMode) {
 // ═══════════════════════════════════════════════
 //  START
 // ═══════════════════════════════════════════════
-init();
+hydrateAndStart();
 </script>
 </body>
 </html>
